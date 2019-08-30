@@ -33,11 +33,14 @@ import re
 from PySide2.QtGui import QColor
 
 
+# Cache colours for later retrieval
 COLOUR_MAP = {}
 
+# Regexps used for parsing colour strings
 NUM_RE = r'(\d+\.?\d*)'
 NUM_RE = re.compile(NUM_RE)
 
+# Cache some default colours named in codeskulptor docs
 for colour_name in ['Aqua',
                     'Black',
                     'Blue',

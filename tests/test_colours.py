@@ -1,10 +1,25 @@
 import unittest
 
+from simplequi._colours import get_colour
+
 
 class TestColours(unittest.TestCase):
+    """Test cases to exercise the _colours module
+
+    Exercises internal functions but only uses external get_colour api"""
+
     def test_rgb(self):
         """Test valid and invalid rgb strings"""
-        self.fail('not implemented')
+        data = [
+            ('rgb(0, 255, 255)', (0, 255, 255, 255)),
+            ('rgb(20%, 45%, 83.2%)', (51, 115, 212, 255)),
+            ('rgb(, , )', (0, 255, 255, 255)),
+            ('rgb(, , )', (0, 255, 255, 255)),
+            ('rgb(, , )', (0, 255, 255, 255)),
+            ('rgb(, , )', (0, 255, 255, 255)),
+        ]
+        for inp, out in data:
+            self.assertTupleEqual(get_colour(inp).getRgb(), out)
 
     def test_rgba(self):
         """Test valid and invalid rgba strings"""
