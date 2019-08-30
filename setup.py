@@ -45,10 +45,11 @@ setup(
     ],
     packages=['simplequi'],
     # include_package_data=True,  Might be relevant later
-    install_requires=[],
+    install_requires=['PySide2>=5.12.0'],  # Currently only support PySide2
     extras_require={
         'dev': [
             'bump2version==0.5.11',
+            'PySide2>=5.12.0'
             'setuptools==41.2.0',
             'wheel==0.33.6',
         ],
