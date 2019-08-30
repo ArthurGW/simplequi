@@ -8,18 +8,36 @@ class TestColours(unittest.TestCase):
 
     Exercises internal functions but only uses external get_colour api"""
 
+    def assertTupleAlmostEqual(self, t1, t2, msg='', dp=3):
+        """Fuzzy comparer for tuples with floating point entries"""
+
+        for ind, vals in enumerate(zip(t1, t2)):
+            v1, v2 = vals
+            v1 = round(v1, dp)
+            v2 = round(v2, dp)
+            if v1 != v2:
+                # Mismatching entry found: use normal tuple exception for nice error formatting
+                self.assertTupleEqual(t1, t2)
+
     def test_rgb(self):
         """Test valid and invalid rgb strings"""
         data = [
-            ('rgb(0, 255, 255)', (0, 255, 255, 255)),
-            ('rgb(20%, 45%, 83.2%)', (51, 115, 212, 255)),
-            ('rgb(, , )', (0, 255, 255, 255)),
-            ('rgb(, , )', (0, 255, 255, 255)),
-            ('rgb(, , )', (0, 255, 255, 255)),
-            ('rgb(, , )', (0, 255, 255, 255)),
+            ('rgb(0, 255, 255)', (0., 1., 1., 1.)),
+            ('rgb(20%, 45%, 83.2%)', (0.2, 0.45, 0.832, 1.)),
+            ('rgb(25.5, 25.5, 51.00)', (0.1, 0.1, 0.2, 1.)),
         ]
+
+        bad_data = [
+            'rgb(, , )',
+            'rgb(300, 123.2, 233)',
+            'rgb(120%, 99%, 30%)',
+        ]
+
         for inp, out in data:
-            self.assertTupleEqual(get_colour(inp).getRgb(), out)
+            self.assertTupleAlmostEqual(get_colour(inp).getRgbF(), out)
+
+        for inp in bad_data:
+            self.assertRaises(ValueError, lambda: get_colour(inp))
 
     def test_rgba(self):
         """Test valid and invalid rgba strings"""

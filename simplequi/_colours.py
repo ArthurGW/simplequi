@@ -28,17 +28,27 @@ transparencies can be specified in a any CSS color format, including hexadecimal
 Function 'get_colour' converts a colour string to a QColor and also stores it in the module dict for later use.
 """
 
+from enum import Enum
 import re
 
 from PySide2.QtGui import QColor
 
 
-# Cache colours for later retrieval
-COLOUR_MAP = {}
-
 # Regexps used for parsing colour strings
 NUM_RE = r'(\d+\.?\d*)'
 NUM_RE = re.compile(NUM_RE)
+
+
+class ColourTypes(Enum):
+    """Conversion factors for various colour formats to put values in valid range and factory functions for QColors"""
+
+    RGB =     ([255, 255, 255, 1], QColor.fromRgbF)  # Values in range 0-255, 0 <= alpha <= 1
+    RGB_PCT = ([100, 100, 100, 1], QColor.fromRgbF)  # Values in percent, 0 <= alpha <= 1
+    HSL =     ([360, 100, 100, 1], QColor.fromHslF)  # Hue in range 0-360, S,L in percent, 0 <= alpha <= 1
+
+
+# Cache colours for later retrieval
+COLOUR_MAP = {}
 
 # Cache some default colours named in codeskulptor docs
 for colour_name in ['Aqua',
@@ -64,34 +74,27 @@ for colour_name in ['Aqua',
         raise ValueError('invalid colour name {colour}'.format(colour=colour_name))
 
 
-def _convert_rgb_colour(name):
-    # type: (str) -> QColor
-    """Convert a string in CSS RGB(A) format to a QColor"""
-    numbers = NUM_RE.findall(name)
-    numbers = [float(x) for x in numbers]
+def _get_float_colour_values(text, factors):
+    # type: (str, list) -> list[float]
+    """Extract float values from colour string and ensure they are all in the valid range 0.0 - 1.0"""
+    numbers = NUM_RE.findall(text)
+    numbers = [float(x) / fact for x, fact in zip(numbers, factors)]
 
-    if '%' in name:
-        numbers[:3] = [x / 100 for x in numbers[:3]]
-    else:
-        numbers[:3] = [x / 255 for x in numbers[:3]]
+    if len(numbers) < 3:
+        raise ValueError('not enough values in colour string: ' + text)
 
-    colour = QColor()
-    colour.setRgbF(*numbers)
-    return colour
+    if not all([0.0 <= x <= 1.0 for x in numbers]):
+        raise ValueError('invalid values in colour string: ' + text)
+
+    return numbers
 
 
-def _convert_hsl_colour(name):
-    # type: (str) -> QColor
-    """Convert a string in CSS HSL(A) format to a QColor"""
-    numbers = NUM_RE.findall(name)
-    numbers = [float(x) for x in numbers]
-
-    # Convert values to range 0-1 (except optional alpha channel which must already be in this range)
-    numbers[:3] = [numbers[0] / 360, numbers[1] / 100, numbers[2] / 100]
-
-    colour = QColor()
-    colour.setHslF(*numbers)
-    return colour
+def _convert_colour_string(name, colour_type):
+    # type: (str, ColourTypes) -> QColor
+    """Convert a string in CSS RGB(A) or HSL(A) format to a QColor"""
+    factors, func = colour_type.value
+    numbers = _get_float_colour_values(name, factors)
+    return func(*numbers)
 
 
 def get_colour(name):
@@ -103,10 +106,11 @@ def get_colour(name):
     if QColor.isValidColor(name):
         COLOUR_MAP[name] = QColor(name)
     elif name.lower().startswith('rgb'):
-        COLOUR_MAP[name] = _convert_rgb_colour(name)
+        colour_type = ColourTypes.RGB_PCT if '%' in name else ColourTypes.RGB
+        COLOUR_MAP[name] = _convert_colour_string(name, colour_type)
     elif name.lower().startswith('hsl'):
-        COLOUR_MAP[name] = _convert_hsl_colour(name)
+        COLOUR_MAP[name] = _convert_colour_string(name, ColourTypes.HSL)
     else:
-        raise ValueError('unknown colour string {colour}'.format(colour=name))
+        raise ValueError('unknown colour string: ' + name)
 
     return COLOUR_MAP[name]
