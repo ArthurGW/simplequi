@@ -46,7 +46,7 @@ setup(
     install_requires=[],
     extras_require={
         'dev': [
-            'bumpversion==0.5.3',
+            'bump2version==0.5.11',
             'setuptools==41.2.0',
             'wheel==0.33.6',
         ],
