@@ -28,7 +28,7 @@ with open(readme_path, 'w') as readme_file:
 
 setup(
     name='simplequi',
-    version='0.0.1',
+    version='0.0.2',
     description='Run codeskulptor.org programs on the desktop using Qt/PySide2',
     long_description=README,
     long_description_content_type='text/markdown',
