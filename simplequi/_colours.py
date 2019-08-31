@@ -19,13 +19,16 @@
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 """
-Colour constants for use in other functions
+Colour constants and factories for use in other functions
 
 Externally, these are most easily accessed using their colour names e.g. 'Blue'.  They can also be specified as per the
 Codeskulptor documentation: "More generally, you may use any HTML color name. Furthermore, custom colors and
 transparencies can be specified in a any CSS color format, including hexadecimal, RGB, RGBA, HSL, and HSLA."
 
 Function 'get_colour' converts a colour string to a QColor and also stores it in the module dict for later use.
+
+Note: this module is entirely generic and not specific to simplequi - it could be used anywhere to convert any valid CSS
+string colour representation to a QColor.
 """
 
 from enum import Enum
