@@ -100,6 +100,9 @@ def _convert_colour_string(name, colour_type):
 def get_colour(name):
     # type: (str) -> QColor
     """Translate a colour name in any valid CSS format to a QColor"""
+    if type(name) != str:
+        raise TypeError('invalid colour specifier, should be a string. Got type: {}'.format(type(name)))
+
     if name in COLOUR_MAP:
         return COLOUR_MAP[name]
 
