@@ -19,6 +19,33 @@
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
-__version__ = '0.1.0'
+import unittest
 
-from _api import *
+import simplequi
+
+
+class MyTestCase(unittest.TestCase):
+    """Basic API sanity checks"""
+
+    API = [
+        ('create_frame', ('Title', 100, 100, 20)),
+        ('create_timer', (500, lambda: print(5))),
+        ('load_image', ('http://iana.org/_img/2015.1/iana-logo-homepage.svg',)),
+        ('load_sound', ('http://iana.org/_img/2015.1/iana-logo-homepage.svg',)),
+    ]
+
+    def test_api_not_currently_implemented(self):
+        for func, args in self.API:
+            func = getattr(simplequi, func)
+            self.assertRaises(NotImplementedError, func, *args)
+
+    def test_key_map(self):
+        """Just test by length all keys are in map and currently None"""
+        self.assertEqual(67, len(simplequi.KEY_MAP))
+
+        for key, val in simplequi.KEY_MAP.items():
+            self.assertIsNone(val, 'key \'{}\' does not have value \'None\''.format(key))
+
+
+if __name__ == '__main__':
+    unittest.main()

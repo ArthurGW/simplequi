@@ -18,10 +18,66 @@
 # You should have received a copy of the GNU General Public License
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
+"""The basic simplegui API - all package-level calls go through here.
+
+The returned objects from these functions all implement their own APIs defined in their respective modules."""
+
+from typing import Callable
+from typing import Optional
+
+from _frame import Frame
+from _image import Image
+from _keys import KEY_MAP
+from _sound import Sound
+from _timer import Timer
 
 __all__ = ['KEY_MAP',
            'create_frame',
-           'create_sound',
            'create_timer',
            'load_image',
            'load_sound']
+
+
+def create_frame(title, canvas_width, canvas_height, control_width=None):
+    # type: (str, int, int, Optional[int]) -> Frame
+    """Creates a new frame for interactive programs.
+
+    The frame's window has the given title, a string.
+    The frame consists of two parts: a control panel on the left and a canvas on the right.
+    The control panel's width in pixels can be specified by the number control_width.
+    The canvas width in pixels is the number canvas_width.
+    The height in pixels of both the control panel and canvas is the number canvas_height.
+    """
+    return Frame()
+
+
+def create_timer(interval, timer_handler):
+    # type: (int, Callable) -> Timer
+    """Creates a timer.
+
+    Once started, it will repeatedly call the given event handler at the specified interval, which is given in ms.
+    The handler should be defined with no arguments.
+    """
+    return Timer()
+
+
+def load_image(url):
+    # type: (str) -> Image
+    """
+    Loads an image from the specified URL.
+
+    The image can be in any format supported by PySide2.
+    No error is raised if the file isn't found or is of an unsupported format.
+    """
+    return Image()
+
+
+def load_sound(url):
+    # type: (str) -> Sound
+    """
+    Loads a sound from the specified URL.
+
+    Supports whatever audio formats that PySide2 supports.
+    No error is raised if the file isn't found or is of an unsupported format.
+    """
+    return Sound()
