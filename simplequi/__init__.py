@@ -19,6 +19,6 @@
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
-__version__ = '0.0.3'
+__version__ = '0.1.0'
 
 # from _api import *
