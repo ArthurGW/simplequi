@@ -22,20 +22,20 @@
 import unittest
 
 import simplequi
+from simplequi._widgets import Frame, get_new_frame
 
 
 class MyTestCase(unittest.TestCase):
     """Basic API sanity checks"""
 
-    API = [
-        ('create_frame', ('Title', 100, 100, 20)),
+    NOT_IMP_API = [
         ('create_timer', (500, lambda: print(5))),
         ('load_image', ('http://iana.org/_img/2015.1/iana-logo-homepage.svg',)),
         ('load_sound', ('http://iana.org/_img/2015.1/iana-logo-homepage.svg',)),
     ]
 
     def test_api_not_currently_implemented(self):
-        for func, args in self.API:
+        for func, args in self.NOT_IMP_API:
             func = getattr(simplequi, func)
             self.assertRaises(NotImplementedError, func, *args)
 
@@ -45,6 +45,10 @@ class MyTestCase(unittest.TestCase):
 
         for key, val in simplequi.KEY_MAP.items():
             self.assertIsNone(val, 'key \'{}\' does not have value \'None\''.format(key))
+
+    def test_create_frame(self):
+        self.assertIsInstance(get_new_frame('Title', 100, 100), Frame)
+        # TODO: more tests here
 
 
 if __name__ == '__main__':

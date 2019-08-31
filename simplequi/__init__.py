@@ -21,4 +21,12 @@
 
 __version__ = '0.1.0'
 
+from PySide2.QtWidgets import QApplication
+# Init an app now to be the parent of all widgets etc.
+_app = QApplication([])
+
 from _api import *
+import _api
+
+__all__ = _api.__all__
+
