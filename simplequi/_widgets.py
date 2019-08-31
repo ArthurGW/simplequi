@@ -18,26 +18,53 @@
 # You should have received a copy of the GNU General Public License
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
-from typing import Any
+
 from typing import Callable
 from typing import Optional
 from typing import Tuple
+import sys
 
-from PySide2.QtWidgets import QWidget
+from PySide2.QtWidgets import QLabel, QWidget, QFrame, QVBoxLayout
 
 from _colours import get_colour
+from simplequi import _app
+
+
+DEFAULT_CONTROL_PANEL_WIDTH = 100
+
+
+class EventWidget(QLabel):
+    """Control for the keypress and mouse event info panels"""
+    def __init__(self, default_string, parent=None, width=100):
+        super().__init__(default_string, parent)
+        self.setFrameStyle(QFrame.Box | QFrame.Plain)
+        self.setFixedSize(width, 17)
 
 
 class Frame:
-    """Singleton Frame containing all other widgets"""
+    """Singleton Frame containing all other widgets
+
+    Note the singleton-ness in not strictly enforced here, but the module function 'reset_frame' is the only external
+    function that should be used to get Frames, and that simply resets the fixed instance of this class
+    """
+
+    __first_init = True
 
     def __init__(self, title, canvas_width, canvas_height, control_width=None):
         # type: (str, int, int, Optional[int]) -> None
         """Create a frame"""
-        self.__main_widget = QWidget()
-        self.__controls = []
+        if self.__first_init:
+            # This actually gets deleted by reset but this is the easiest way to do it
+            self.__main_widget = QWidget()
 
-        self._reset(title, canvas_width, canvas_height, control_width)
+        # Actually setup the UI
+        self.__reset(title, canvas_width, canvas_height, control_width)
+
+        if not self.__first_init:
+            # The first init is a dummy one to create the singleton, hence only show window on future inits
+            self.__main_widget.show()
+        else:
+            self.__first_init = False
 
     def set_canvas_background(self, colour):
         # type: (str) -> None
@@ -45,9 +72,10 @@ class Frame:
         colour = get_colour(colour)
         raise NotImplementedError
 
-    def start(self):
+    @staticmethod
+    def start():
         """Commence event handling on the frame"""
-        raise NotImplementedError
+        sys.exit(_app.exec_())
 
     def get_canvas_textwidth(self, text, size, face):
         # type: (str, int, str) -> int
@@ -127,24 +155,35 @@ class Frame:
         The handler should be defined with one parameter. This parameter will receive a canvas object."""
         raise NotImplementedError
 
-    # Internal API - not designed to be used by users of the package, but necessary to be on this class
-    def _reset(self, title, canvas_width, canvas_height, control_width=None):
-        """Destroys all widgets associated with this frame, stops handlers running, sets params to new values.
+    # Internal API
+    def __reset(self, title, canvas_width, canvas_height, control_width=None):
+        # type: (str, int, int, Optional[int]) -> None
+        """Destroys all widgets associated with this frame, stops handlers running, sets params to new values"""
+        # Destroy old widget, which cascades down to all child widgets, and create new
+        self.__main_widget.deleteLater()
+        self.__main_widget = QWidget()
 
-        Not designed to be used by users"""
-        pass
+        # Basic window layout
+        self.__main_widget.setWindowTitle(title)
+        control_width = DEFAULT_CONTROL_PANEL_WIDTH if control_width is None else control_width
+        total_width = canvas_width + control_width
+        total_height = canvas_height
+        self.__main_widget.setFixedSize(total_width, total_height)
 
-    def _show(self):
-        """Actually display the frame"""
-        pass
+        # Widgets layout
+        self.__main_layout = QVBoxLayout()
+        self.__controls = [EventWidget('Key: ', self.__main_widget), EventWidget('Mouse: ', self.__main_widget)]
+        for cont in self.__controls:
+            self.__main_layout.addWidget(cont)
+        self.__main_widget.setLayout(self.__main_layout)
 
 
-FRAME = Frame('', 1, 1)
+# Create singleton Frame with dummy params
+FRAME = Frame('', 1, 1, DEFAULT_CONTROL_PANEL_WIDTH)
 
 
-def get_new_frame(title, canvas_width, canvas_height, control_width=None):
+def reset_frame(title, canvas_width, canvas_height, control_width=None):
     # type: (str, int, int, Optional[int]) -> Frame
-    """Reset the previous frame and return a new design"""
-    FRAME._reset(title, canvas_width, canvas_height, control_width)
-    FRAME._show()
+    """Reset the previous frame and return singleton"""
+    Frame.__init__(FRAME, title, canvas_width, canvas_height, control_width)
     return FRAME

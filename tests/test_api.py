@@ -22,7 +22,6 @@
 import unittest
 
 import simplequi
-from simplequi._widgets import Frame, get_new_frame
 
 
 class MyTestCase(unittest.TestCase):
@@ -47,7 +46,7 @@ class MyTestCase(unittest.TestCase):
             self.assertIsNone(val, 'key \'{}\' does not have value \'None\''.format(key))
 
     def test_create_frame(self):
-        self.assertIsInstance(get_new_frame('Title', 100, 100), Frame)
+        self.assertIs(simplequi.create_frame('Old Title', 200, 120), simplequi.create_frame('Title', 100, 100))
         # TODO: more tests here
 
 

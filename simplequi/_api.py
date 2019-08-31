@@ -25,7 +25,7 @@ The returned objects from these functions all implement their own APIs defined i
 from typing import Callable
 from typing import Optional
 
-from _widgets import get_new_frame
+from _widgets import reset_frame
 from _image import Image
 from _keys import KEY_MAP
 from _sound import Sound
@@ -48,7 +48,7 @@ def create_frame(title, canvas_width, canvas_height, control_width=None):
     The canvas width in pixels is the number canvas_width.
     The height in pixels of both the control panel and canvas is the number canvas_height.
     """
-    return get_new_frame(title, canvas_width, canvas_height, control_width)
+    return reset_frame(title, canvas_width, canvas_height, control_width)
 
 
 def create_timer(interval, timer_handler):
