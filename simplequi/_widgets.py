@@ -29,8 +29,8 @@ from PySide2.QtGui import QTextOption, QKeyEvent
 from PySide2.QtWidgets import QLabel, QPushButton, QPlainTextEdit, QWidget, QFrame, QHBoxLayout, QVBoxLayout, \
     QSizePolicy
 
+from _canvas import Canvas, DrawingArea
 from _colours import get_colour
-from _canvas import CanvasContainer, DrawArea
 from _constants import DEFAULT_WIDGET_HEIGHT, DEFAULT_CONTROL_ENTRY_WIDTH, DEFAULT_FRAME_MARGIN, NO_MARGINS
 from simplequi import _app
 
@@ -220,7 +220,7 @@ class Frame:
         # type: (str) -> None
         """Changes the background colour of the frame 's canvas, which defaults to black"""
         colour = get_colour(colour)
-        raise NotImplementedError
+        self.__drawing_area.set_background_colour(colour)
 
     @staticmethod
     def start():
@@ -303,7 +303,7 @@ class Frame:
         """Adds an event handler that is responsible for all drawing.
 
         The handler should be defined with one parameter. This parameter will receive a canvas object."""
-        raise NotImplementedError
+        self.__drawing_area.set_draw_handler(draw_handler)
 
     # Internal API
     def __reset(self, title, canvas_width, canvas_height, control_width=None):
@@ -328,10 +328,10 @@ class Frame:
         self.__main_layout.setSpacing(DEFAULT_FRAME_MARGIN.left())
         self.__main_layout.setContentsMargins(DEFAULT_FRAME_MARGIN)
         self.__controls = ControlPanelWidget(self.__main_widget, canvas_height, control_width)
-        self.__canvas = DrawArea(self.__main_widget, canvas_width, canvas_height)
+        self.__drawing_area = DrawingArea(self.__main_widget, canvas_width, canvas_height)
 
         self.__main_layout.addWidget(self.__controls, alignment=Qt.AlignCenter)
-        self.__main_layout.addWidget(self.__canvas, alignment=Qt.AlignCenter)
+        self.__main_layout.addWidget(self.__drawing_area, alignment=Qt.AlignCenter)
         self.__main_widget.setLayout(self.__main_layout)
 
 

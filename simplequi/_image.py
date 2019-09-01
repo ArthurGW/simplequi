@@ -20,6 +20,6 @@
 # -----------------------------------------------------------------------------
 
 
-class Image(NotImplementedError):
+class Image:
     def __init__(self) -> None:
         raise NotImplementedError()

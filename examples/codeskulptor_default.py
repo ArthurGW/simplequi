@@ -22,16 +22,18 @@ def click(v=None):
 
 # Handler to draw on canvas
 def draw(canvas):
-    canvas.draw_text(message, [50,112], 48, "Red")
+    # canvas.draw_text(message, [50,112], 48, "Red")
+    pass
 
 
 # Create a frame and assign callbacks to event handlers
 frame = simplegui.create_frame("Home", 300, 200)
+frame.set_canvas_background('aqua')
 frame.add_button("Click me", click)
-l=frame.add_label('lAB1', 120)
+l = frame.add_label('lAB1', 120)
 frame.add_input('INPgUT', l.set_text, 300)
 
-# frame.set_draw_handler(draw)
+frame.set_draw_handler(draw)
 
 # Start the frame animation
 frame.start()
