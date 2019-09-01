@@ -21,6 +21,7 @@
 
 from collections import deque, namedtuple
 from enum import auto, Enum
+from math import pi
 from typing import Callable, Union, Tuple, List
 from typing import Iterable
 from typing import Optional
@@ -39,15 +40,67 @@ Size = Point  # Same signature but different named for clarity
 ObjectHolder = namedtuple('ObjectHolder', ['obj_type', 'args'])
 
 
-def render_line(painter, args):
-    # type: (QPainter, tuple) -> None
-    """Render line on canvas"""
-    painter.save()
-    start, end, width, colour = args
-    pen = QPen(QBrush(get_colour(colour)), width)
+def radians_to_qpainter_angle(rads):
+    # type: (float) -> int
+    """Convert an angle in radians to one in 1/16ths of degrees as used by QPainter"""
+    return int(360 * 16 * rads / (2 * pi))
+
+
+def set_painter_line_width_and_colour(painter, line_width, line_colour):
+    # type: (QPainter, int, str) -> None
+    """Setup QPainter for drawing"""
+    pen = QPen(QBrush(get_colour(line_colour)), line_width)
     painter.setPen(pen)
+
+
+def set_painter_fill_colour(painter, fill_colour):
+    # type: (QPainter, str) -> None
+    """Set fill"""
+    painter.setBrush(QBrush(get_colour(fill_colour)))
+
+
+def set_painter_lines_and_fill(painter, line_width, line_colour, fill_colour=None):
+    # type: (QPainter, int, str, Optional[str]) -> None
+    """Fully setup painter for drawing"""
+    set_painter_line_width_and_colour(painter, line_width, line_colour)
+    if fill_colour is not None:
+        set_painter_fill_colour(painter, fill_colour)
+
+
+def render_line(painter, start, end, line_width, line_colour):
+    # type: (QPainter, Point, Point, int, str) -> None
+    """Render line on canvas"""
+    set_painter_line_width_and_colour(painter, line_width, line_colour)
     painter.drawLine(*start, *end)
-    painter.restore()
+
+
+def get_circle_rect(center_point, radius):
+    # type: (Point, int) -> Tuple[int, int, int, int]
+    """Returns the rectangle containing a circle with given centre and radius.
+
+    Returns a tuple containing (top_left_x, top_left_y, width, height) of the rectangle.
+    """
+    center_x, center_y = center_point
+    return center_x - radius, center_y - radius, radius * 2, radius * 2
+
+
+def render_arc(painter, center_point, radius, start_angle, arc_len, line_width, line_colour, fill_colour=None):
+    # type: (QPainter, Point, int, int, int, int, str, Optional[str]) -> None
+    """Render arc (filled or not) or full circle on canvas"""
+    rect = get_circle_rect(center_point, radius)
+    set_painter_lines_and_fill(painter, line_width, line_colour, fill_colour)
+    if fill_colour is None:
+        painter.drawArc(*rect, start_angle, -arc_len)
+    else:
+        painter.drawPie(*rect, start_angle, -arc_len)
+
+
+def render_circle(painter, center_point, radius, line_width, line_colour, fill_colour=None):
+    # type: (QPainter, Point, int, int, str, Optional[str]) -> None
+    """Render circle on canvas"""
+    rect = get_circle_rect(center_point, radius)
+    set_painter_lines_and_fill(painter, line_width, line_colour, fill_colour)
+    painter.drawEllipse(*rect)
 
 
 class ObjectTypes(Enum):
@@ -63,6 +116,8 @@ class ObjectTypes(Enum):
 
 OBJECT_RENDERERS = {
     ObjectTypes.Line: render_line,
+    ObjectTypes.Arc: render_arc,
+    ObjectTypes.Circle: render_circle,
 }
 
 
@@ -131,10 +186,9 @@ class DrawingArea(QWidget):
             True)
         painter.fillRect(0, 0, self.__width, self.__height, self.__background_colour)
         for obj in self.__objects:
-            OBJECT_RENDERERS[obj.obj_type](painter, obj.args)
-        painter.setPen(get_colour('Blue'))
-        painter.drawArc(self.rect(), 0, self.__ang * 16)
-        self.__ang += 1
+            painter.save()
+            OBJECT_RENDERERS[obj.obj_type](painter, *obj.args)
+            painter.restore()
 
 
 class Canvas:
@@ -195,7 +249,8 @@ class Canvas:
         positive. The fill color defaults to None. If the fill color is specified, then the interior of the circle is
         colored.
         """
-        raise NotImplementedError
+        self.__drawing_area.add_object(ObjectHolder(ObjectTypes.Circle,
+                                                    (center_point, radius, line_width, line_color, fill_color)))
 
     def draw_arc(self, center_point, radius, start_angle, end_angle, line_width, line_color, fill_color=None):
         # type: (Point, int, float, float, int, str, Optional[str]) -> None
@@ -206,7 +261,12 @@ class Canvas:
         position. The line's width is given in pixels and must be positive. The fill color defaults to None. If the fill
         color is specified, then the interior of the circle is colored.
         """
-        raise NotImplementedError
+        arc_len = end_angle - start_angle
+        arc_len = radians_to_qpainter_angle(arc_len)
+        start_angle = radians_to_qpainter_angle(start_angle)
+        self.__drawing_area.add_object(ObjectHolder(ObjectTypes.Arc,
+                                                   (center_point, radius, start_angle, arc_len,
+                                                    line_width, line_color, fill_color)))
 
     def draw_point(self, point, color):
         # type: (Point, str) -> None

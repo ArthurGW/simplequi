@@ -24,6 +24,7 @@ def click(v=None):
 def draw(canvas):
     # canvas.draw_text(message, [50,112], 48, "Red")
     canvas.draw_line([0, 0], [300, 200], 3, 'red')
+    canvas.draw_circle([150, 100], 99, 2, 'green', 'purple')
 
 
 # Create a frame and assign callbacks to event handlers
