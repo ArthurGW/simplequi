@@ -103,6 +103,13 @@ def render_circle(painter, center_point, radius, line_width, line_colour, fill_c
     painter.drawEllipse(*rect)
 
 
+def render_point(painter, point, colour):
+    # type: (QPainter, Point, str) -> None
+    """Render point on canvas"""
+    set_painter_line_width_and_colour(painter, 1, colour)
+    painter.drawPoint(*point)
+
+
 class ObjectTypes(Enum):
     Text = auto()
     Line = auto()
@@ -118,6 +125,7 @@ OBJECT_RENDERERS = {
     ObjectTypes.Line: render_line,
     ObjectTypes.Arc: render_arc,
     ObjectTypes.Circle: render_circle,
+    ObjectTypes.Point: render_point,
 }
 
 
@@ -272,7 +280,7 @@ class Canvas:
         # type: (Point, str) -> None
         """Draws a 1×1 rectangle at the given point in the given color. The point is a 2-element tuple or list of screen
         coordinates."""
-        raise NotImplementedError
+        self.__drawing_area.add_object(ObjectHolder(ObjectTypes.Point, (point, color)))
 
     def draw_image(self, image, center_source, width_height_source, center_dest, width_height_dest, rotation=None):
         # type: (Image, Point, Size, Point, Size, Optional[float]) -> None
