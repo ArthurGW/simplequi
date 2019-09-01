@@ -29,7 +29,7 @@ def draw(canvas):
 frame = simplegui.create_frame("Home", 300, 200)
 frame.add_button("Click me", click)
 l=frame.add_label('lAB1', 120)
-frame.add_input('INPgUT', l.set_text, 140)
+frame.add_input('INPgUT', l.set_text, 300)
 
 # frame.set_draw_handler(draw)
 

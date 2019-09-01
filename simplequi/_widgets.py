@@ -24,17 +24,15 @@ from typing import Optional
 from typing import Tuple
 import sys
 
-from PySide2.QtCore import Qt, QMargins, Signal
+from PySide2.QtCore import Qt, Signal, QTimer
 from PySide2.QtGui import QTextOption, QKeyEvent
-from PySide2.QtWidgets import QLabel, QPushButton, QPlainTextEdit, QWidget, QFrame, QHBoxLayout, QVBoxLayout
+from PySide2.QtWidgets import QLabel, QPushButton, QPlainTextEdit, QWidget, QFrame, QHBoxLayout, QVBoxLayout, \
+    QSizePolicy
 
 from _colours import get_colour
+from _canvas import CanvasContainer, DrawArea
+from _constants import DEFAULT_WIDGET_HEIGHT, DEFAULT_CONTROL_ENTRY_WIDTH, DEFAULT_FRAME_MARGIN, NO_MARGINS
 from simplequi import _app
-
-
-DEFAULT_WIDGET_HEIGHT = 25
-DEFAULT_CONTROL_ENTRY_WIDTH = 200
-DEFAULT_FRAME_MARGIN = 20
 
 
 class Control:
@@ -109,10 +107,10 @@ class TextInputWidget(QWidget):
         self.__input.setFixedSize(width, DEFAULT_WIDGET_HEIGHT)
         self.__input.enter_pressed.connect(self.enter_pressed)
 
-        self.setContentsMargins(QMargins())
+        self.setContentsMargins(NO_MARGINS)
         layout = QVBoxLayout(self)
         layout.setSpacing(1)
-        layout.setContentsMargins(QMargins())
+        layout.setContentsMargins(NO_MARGINS)
         layout.addWidget(self.__label)
         layout.addWidget(self.__input)
         self.setLayout(layout)
@@ -136,11 +134,12 @@ class ControlPanelWidget(QWidget):
         if width is not None:
             self.setFixedWidth(width)
 
-        layout = QVBoxLayout()
-        layout.addStretch()
         self.__insertion_point = 0  # Where new widgets are added
-        self.setContentsMargins(0, 0, 0, 0)
-        layout.setContentsMargins(5, 5, 5, 5)
+        self.setContentsMargins(NO_MARGINS)
+        layout = QVBoxLayout()
+        layout.setSizeConstraint(QHBoxLayout.SetFixedSize)
+        layout.setContentsMargins(NO_MARGINS)
+        layout.addStretch()
 
         self.__key_widget = EventWidget('Key: ', self)
         self.__mouse_widget = EventWidget('Mouse: ', self)
@@ -316,18 +315,23 @@ class Frame:
 
         # Basic window layout
         self.__main_widget.setWindowTitle(title)
-        # control_width = DEFAULT_CONTROL_PANEL_WIDTH if control_width is None else control_width
-        # total_width = canvas_width + control_width + DEFAULT_FRAME_MARGIN * 2
-        total_height = canvas_height + DEFAULT_FRAME_MARGIN * 2
+        total_height = canvas_height + DEFAULT_FRAME_MARGIN.top() * 2
         self.__main_widget.setFixedHeight(total_height)
+        self.__main_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        palette = self.__main_widget.palette()
+        palette.setColor(palette.Window, get_colour('white'))
+        self.__main_widget.setPalette(palette)
 
         # Widgets layout
         self.__main_layout = QHBoxLayout()
-        self.__main_layout.setContentsMargins(*([DEFAULT_FRAME_MARGIN] * 4))
-        self.__controls = ControlPanelWidget(self.__main_widget, canvas_height)
-        self.__controls2 = ControlPanelWidget(self.__main_widget, canvas_height)  # Duplicate for testing
-        self.__main_layout.addWidget(self.__controls, alignment=Qt.AlignLeft)
-        self.__main_layout.addWidget(self.__controls2)  # Duplicate for testing.  TODO: remove
+        self.__main_layout.setSizeConstraint(QHBoxLayout.SetFixedSize)
+        self.__main_layout.setSpacing(DEFAULT_FRAME_MARGIN.left())
+        self.__main_layout.setContentsMargins(DEFAULT_FRAME_MARGIN)
+        self.__controls = ControlPanelWidget(self.__main_widget, canvas_height, control_width)
+        self.__canvas = DrawArea(self.__main_widget, canvas_width, canvas_height)
+
+        self.__main_layout.addWidget(self.__controls, alignment=Qt.AlignCenter)
+        self.__main_layout.addWidget(self.__canvas, alignment=Qt.AlignCenter)
         self.__main_widget.setLayout(self.__main_layout)
 
 
