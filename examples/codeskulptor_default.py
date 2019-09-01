@@ -23,7 +23,7 @@ def click(v=None):
 # Handler to draw on canvas
 def draw(canvas):
     # canvas.draw_text(message, [50,112], 48, "Red")
-    pass
+    canvas.draw_line([0, 0], [300, 200], 3, 'red')
 
 
 # Create a frame and assign callbacks to event handlers

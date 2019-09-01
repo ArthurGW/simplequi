@@ -19,20 +19,51 @@
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
-from collections import deque
-from typing import Callable
+from collections import deque, namedtuple
+from enum import auto, Enum
+from typing import Callable, Union, Tuple, List
 from typing import Iterable
 from typing import Optional
 
 from PySide2.QtWidgets import QWidget
-from PySide2.QtGui import QPainter, QColor, QPaintEvent, QBrush
+from PySide2.QtGui import QPainter, QColor, QPaintEvent, QBrush, QPen
 
 from _colours import get_colour
 from _constants import NO_MARGINS, SUPPORTED_FONT_FACES
 from _image import Image
 
-Point = Iterable[int, int]
-Size = Point
+Point = Union[List[int], Tuple[int, int]]  # As lists are mutable typing doesn't let you specify no. of elements
+Size = Point  # Same signature but different named for clarity
+
+
+ObjectHolder = namedtuple('ObjectHolder', ['obj_type', 'args'])
+
+
+def render_line(painter, args):
+    # type: (QPainter, tuple) -> None
+    """Render line on canvas"""
+    painter.save()
+    start, end, width, colour = args
+    pen = QPen(QBrush(get_colour(colour)), width)
+    painter.setPen(pen)
+    painter.drawLine(*start, *end)
+    painter.restore()
+
+
+class ObjectTypes(Enum):
+    Text = auto()
+    Line = auto()
+    Polyline = auto()
+    Polygon = auto()
+    Circle = auto()
+    Arc = auto()
+    Point = auto()
+    Image = auto()
+
+
+OBJECT_RENDERERS = {
+    ObjectTypes.Line: render_line,
+}
 
 
 class DrawingArea(QWidget):
@@ -50,8 +81,8 @@ class DrawingArea(QWidget):
 
         # Drawing stuff
         self.__canvas = Canvas(self)
-        self.__primitives = deque()
-        self.__new_primitives = deque()
+        self.__objects = deque()
+        self.__new_objects = deque()
         self.__draw_handler = None
         self.__draw_timer_id = -1
 
@@ -74,17 +105,17 @@ class DrawingArea(QWidget):
 
     def __draw(self):
         """Call draw handler and re-render widget if necessary"""
-        self.__new_primitives = deque()
+        self.__new_objects = deque()
 
         self.__draw_handler(self.__canvas)
 
-        if self.__new_primitives != self.__primitives:
-            self.__primitives = self.__new_primitives
+        if self.__new_objects != self.__objects:
+            self.__objects = self.__new_objects
             self.update()
 
-    def add_primitive(self, primitive):
+    def add_object(self, primitive):
         """Add a primitive to the draw queue"""
-        self.__new_primitives.append(primitive)
+        self.__new_objects.append(primitive)
 
     def set_background_colour(self, colour):
         # type: (QColor) -> None
@@ -95,11 +126,12 @@ class DrawingArea(QWidget):
         # type: (QPaintEvent) -> None
         """Render all user-specified shapes on the canvas"""
         painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform), True)
+        painter.setRenderHint(
+            QPainter.RenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform),
+            True)
         painter.fillRect(0, 0, self.__width, self.__height, self.__background_colour)
-        painter.setBrush(QBrush(get_colour('Red')))
-        painter.setPen(get_colour('Red'))
-        painter.drawLine(0, 0, self.__width - 1, self.__height - 1)
+        for obj in self.__objects:
+            OBJECT_RENDERERS[obj.obj_type](painter, obj.args)
         painter.setPen(get_colour('Blue'))
         painter.drawArc(self.rect(), 0, self.__ang * 16)
         self.__ang += 1
@@ -115,10 +147,6 @@ class Canvas:
         # type: (DrawingArea) -> None
         """Initialise the wrapper"""
         self.__drawing_area = drawing_area
-
-    def __add_primitive(self, primitive):
-        """Add a primitive to the draw queue"""
-        self.__drawing_area.add_primitive(primitive)
 
     def draw_text(self, text, point, font_size, font_color, font_face='serif'):
         # type: (str, Point, int, str, str) -> None
@@ -137,7 +165,7 @@ class Canvas:
         """Draws a line segment between the two points, each of which is a 2-element tuple or list of screen
         coordinates. The line's width is given in pixels and must be positive.
         """
-        raise NotImplementedError
+        self.__drawing_area.add_object(ObjectHolder(ObjectTypes.Line, (point1, point2, line_width, line_color)))
 
     def draw_polyline(self, point_list, line_width, line_color):
         # type: (Iterable[Point], int, str) -> None
