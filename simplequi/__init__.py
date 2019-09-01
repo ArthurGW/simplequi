@@ -19,7 +19,7 @@
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 from PySide2.QtWidgets import QApplication
 # Init an app now to be the parent of all widgets etc.
