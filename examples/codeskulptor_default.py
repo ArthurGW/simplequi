@@ -13,18 +13,25 @@ import simplequi as simplegui
 
 message = "Welcome!"
 
+
 # Handler for mouse click
-def click():
+def click(v=None):
     global message
     message = "Good job!"
+
 
 # Handler to draw on canvas
 def draw(canvas):
     canvas.draw_text(message, [50,112], 48, "Red")
 
+
 # Create a frame and assign callbacks to event handlers
 frame = simplegui.create_frame("Home", 300, 200)
-# frame.add_button("Click me", click)
+frame.add_button("Click me", click)
+l=frame.add_label('lAB1', 120)
+frame.add_input('INPgUT', l.set_text, 140)
+frame.add_label('Lab2', 120)
+frame.add_label('Lab3', 120)
 # frame.set_draw_handler(draw)
 
 # Start the frame animation
