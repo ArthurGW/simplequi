@@ -273,10 +273,7 @@ class DrawingAreaContainer(QWidget):
 
 
 class Canvas:
-    """Wrapper for the drawing area.
-
-    Implements the codeskulptor canvas API.  Used as a context manager in the canvas drawing call.
-    """
+    """Wrapper for the drawing area. Implements the codeskulptor canvas API."""
 
     def __init__(self, drawing_area):
         # type: (DrawingArea) -> None
@@ -293,7 +290,7 @@ class Canvas:
         if font_face not in SUPPORTED_FONT_FACES:
             raise ValueError('invalid font face specified, valid options are {}'.format(SUPPORTED_FONT_FACES))
 
-        raise NotImplementedError
+        self.__drawing_area.add_object(ObjectHolder(ObjectTypes.Text, (text, point, font_size, font_color, font_face)))
 
     def draw_line(self, point1, point2, line_width, line_color):
         # type: (Point, Point, int, str) -> None
@@ -320,7 +317,8 @@ class Canvas:
         coordinates. The line's width is given in pixels, and must be positive. The fill color defaults to None. If the
         fill color is specified, then the interior of the polygon is colored.
         """
-        raise NotImplementedError
+        self.__drawing_area.add_object(ObjectHolder(ObjectTypes.Polygon,
+                                                    (point_list, line_width, line_color, fill_color)))
 
     def draw_circle(self, center_point, radius, line_width, line_color, fill_color=None):
         # type: (Point, int, int, str, Optional[str]) -> None
@@ -368,7 +366,9 @@ class Canvas:
 
         Specifying a different width or height in the destination than in the source will rescale the image.
         """
-        raise NotImplementedError
+        self.__drawing_area.add_object(ObjectHolder(ObjectTypes.Image,
+                                                    (image, center_source, width_height_source,
+                                                     center_dest, width_height_dest, rotation)))
 
 
 
