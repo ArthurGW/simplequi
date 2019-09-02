@@ -33,6 +33,7 @@ from _app import TheApp
 from _canvas import Canvas, DrawingAreaContainer
 from _colours import get_colour
 from _constants import DEFAULT_WIDGET_HEIGHT, DEFAULT_CONTROL_ENTRY_WIDTH, DEFAULT_FRAME_MARGIN, NO_MARGINS
+from _fonts import get_text_width_for_font_spec, FontSpec
 
 
 class Control:
@@ -267,7 +268,7 @@ class Frame:
         It does not draw the text. This is useful in computing the position to draw text when you want it centered or
         right justified in some region. The supported font faces are the default 'serif', 'sans-serif', and 'monospace'.
         """
-        raise NotImplementedError
+        return get_text_width_for_font_spec(text, FontSpec(size, face))
 
     def add_label(self, text, width=None):
         # type: (str, Optional[int]) -> Control
