@@ -18,10 +18,15 @@
 # You should have received a copy of the GNU General Public License
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
+from typing import Callable
 
 from _app import TheApp
 
 
 class Timer:
-    def __init__(self):
+    """Container for a QTimer that fires at a given rate and calls a handler"""
+
+    def __init__(self, interval, timer_handler):
+        """Create a new timer with the given interval and timeout handler"""
+        # type: (int, Callable[[], None]) -> None
         raise NotImplementedError()

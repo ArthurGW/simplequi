@@ -23,3 +23,14 @@
 class Sound:
     def __init__(self):
         raise NotImplementedError()
+
+    @classmethod
+    def load_sound_from_url(cls, url):
+        # type: (str) -> Sound
+        """
+        Loads an image from the specified URL.
+
+        The image can be in any format supported by PySide2.
+        An error is raised if the file can't be loaded for any reason.
+        """
+        return Sound()

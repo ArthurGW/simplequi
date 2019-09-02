@@ -21,5 +21,16 @@
 
 
 class Image:
-    def __init__(self) -> None:
+    def __init__(self):
         raise NotImplementedError()
+
+    @classmethod
+    def load_image_from_url(cls, url):
+        # type: (str) -> Image
+        """
+        Loads an image from the specified URL.
+
+        The image can be in any format supported by PySide2.
+        An error is raised if the file can't be loaded for any reason.
+        """
+        return Image()
