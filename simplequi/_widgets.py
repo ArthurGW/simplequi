@@ -29,10 +29,10 @@ from PySide2.QtGui import QTextOption, QKeyEvent
 from PySide2.QtWidgets import QLabel, QPushButton, QPlainTextEdit, QWidget, QFrame, QHBoxLayout, QVBoxLayout, \
     QSizePolicy
 
-from _canvas import Canvas, DrawingArea
+from _app import TheApp
+from _canvas import Canvas, DrawingAreaContainer
 from _colours import get_colour
 from _constants import DEFAULT_WIDGET_HEIGHT, DEFAULT_CONTROL_ENTRY_WIDTH, DEFAULT_FRAME_MARGIN, NO_MARGINS
-from simplequi import _app
 
 
 class Control:
@@ -198,34 +198,35 @@ class Frame:
     function that should be used to get Frames, and that simply resets the fixed instance of this class
     """
 
-    __first_init = True
+    __main_widget = None
 
     def __init__(self, title, canvas_width, canvas_height, control_width=None):
         # type: (str, int, int, Optional[int]) -> None
         """Create a frame"""
-        if self.__first_init:
-            # This actually gets deleted by reset but this is the easiest way to do it
-            self.__main_widget = QWidget()
-
         # Actually setup the UI
         self.__reset(title, canvas_width, canvas_height, control_width)
 
-        if not self.__first_init:
-            # The first init is a dummy one to create the singleton, hence only show window on future inits
-            self.__main_widget.show()
-        else:
-            self.__first_init = False
+    def __init_main_widget(self):
+        self.__main_widget = QWidget()
+        # self.__main_widget.setAttribute(Qt.WA_DeleteOnClose)
+        # self.__main_widget.setAttribute(Qt.WA_QuitOnClose, False)
+        # self.__main_widget.setWindowModality(Qt.WindowModal)
 
     def set_canvas_background(self, colour):
         # type: (str) -> None
         """Changes the background colour of the frame 's canvas, which defaults to black"""
-        colour = get_colour(colour)
         self.__drawing_area.set_background_colour(colour)
 
-    @staticmethod
-    def start():
-        """Commence event handling on the frame"""
-        sys.exit(_app.exec_())
+    def start(self):
+        """Commence event handling on the frame.
+
+        Note that since this enters the event loop, this should always be the last statement in a script. Nothing after
+        this will actually be run.
+
+        TODO: change this behaviour somehow...
+        """
+        if not TheApp.is_running:
+            sys.exit(TheApp.exec_())
 
     def get_canvas_textwidth(self, text, size, face):
         # type: (str, int, str) -> int
@@ -305,18 +306,17 @@ class Frame:
         The handler should be defined with one parameter. This parameter will receive a canvas object."""
         self.__drawing_area.set_draw_handler(draw_handler)
 
-    # Internal API
+    # Internal
     def __reset(self, title, canvas_width, canvas_height, control_width=None):
         # type: (str, int, int, Optional[int]) -> None
         """Destroys all widgets associated with this frame, stops handlers running, sets params to new values"""
-        # Destroy old widget, which cascades down to all child widgets, and create new
-        self.__main_widget.deleteLater()
-        self.__main_widget = QWidget()
+        first_init = self.__main_widget is None
+        if not first_init:
+            self.__main_widget.deleteLater()
+        self.__init_main_widget()
 
         # Basic window layout
         self.__main_widget.setWindowTitle(title)
-        total_height = canvas_height + DEFAULT_FRAME_MARGIN.top() * 2
-        self.__main_widget.setFixedHeight(total_height)
         self.__main_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         palette = self.__main_widget.palette()
         palette.setColor(palette.Window, get_colour('white'))
@@ -328,11 +328,16 @@ class Frame:
         self.__main_layout.setSpacing(DEFAULT_FRAME_MARGIN.left())
         self.__main_layout.setContentsMargins(DEFAULT_FRAME_MARGIN)
         self.__controls = ControlPanelWidget(self.__main_widget, canvas_height, control_width)
-        self.__drawing_area = DrawingArea(self.__main_widget, canvas_width, canvas_height)
+        self.__drawing_area = DrawingAreaContainer(self.__main_widget, canvas_width, canvas_height)
 
-        self.__main_layout.addWidget(self.__controls, alignment=Qt.AlignCenter)
+        total_height = self.__drawing_area.height() + DEFAULT_FRAME_MARGIN.top() * 2
+        self.__main_widget.setFixedHeight(total_height)
+
+        self.__main_layout.addWidget(self.__controls, alignment=Qt.Alignment(Qt.AlignLeft | Qt.AlignTop))
         self.__main_layout.addWidget(self.__drawing_area, alignment=Qt.AlignCenter)
         self.__main_widget.setLayout(self.__main_layout)
+        if not first_init:
+            self.__main_widget.show()
 
 
 # Create singleton Frame with dummy params

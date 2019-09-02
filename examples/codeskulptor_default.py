@@ -10,6 +10,9 @@
 
 
 import simplequi as simplegui
+import math
+
+from _canvas import Canvas
 
 message = "Welcome!"
 
@@ -22,14 +25,20 @@ def click(v=None):
 
 # Handler to draw on canvas
 def draw(canvas):
+    # type: (Canvas) -> None
     # canvas.draw_text(message, [50,112], 48, "Red")
-    canvas.draw_line([0, 0], [300, 200], 3, 'red')
     canvas.draw_circle([150, 100], 99, 2, 'green', 'purple')
+    canvas.draw_line([100, 0], [100, 199], 3, 'red')
     canvas.draw_point([150, 100], 'yellow')
+    canvas.draw_point([0, 0], 'red')
+    canvas.draw_point([299, 199], 'red')
+    canvas.draw_point([299, 0], 'red')
+    canvas.draw_point([0, 199], 'red')
+    canvas.draw_arc([150, 100], 50, 0, math.pi / 2, 2, 'orange')
 
 
 # Create a frame and assign callbacks to event handlers
-frame = simplegui.create_frame("Home", 300, 200)
+frame = simplegui.create_frame("Home", 800, 600)
 frame.set_canvas_background('aqua')
 frame.add_button("Click me", click)
 l = frame.add_label('lAB1', 120)

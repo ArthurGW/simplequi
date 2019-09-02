@@ -19,9 +19,26 @@
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
-from _app import TheApp
+from PySide2.QtWidgets import QApplication
 
 
-class Timer:
+class _AppWithRunningFlag(QApplication):
+    """QApplication with property to say whether it has already been exec_ed"""
+
     def __init__(self):
-        raise NotImplementedError()
+        super().__init__([])
+        self.__is_running = False
+
+    def exec_(self):
+        super().exec_()
+        self.__is_running = True
+
+    @property
+    def is_running(self):
+        return self.__is_running
+
+
+TheApp = _AppWithRunningFlag()
+
+
+
