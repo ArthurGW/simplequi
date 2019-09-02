@@ -28,7 +28,7 @@ from typing import Optional
 
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QWidget, QHBoxLayout
-from PySide2.QtGui import QPainter, QColor, QPaintEvent, QBrush, QPen, QPalette
+from PySide2.QtGui import QPainter, QColor, QPaintEvent, QBrush, QPen, QPalette, QPixmap
 
 from _app import TheApp
 from _colours import get_colour
@@ -119,25 +119,25 @@ def render_point(painter, point, colour):
 def render_polyline(painter, point_list, line_width, line_colour):
     # type: (QPainter, Iterable[Point], int, str) -> None
     """Render polyline on canvas"""
-    pass
+    raise NotImplementedError
 
 
 def render_polygon(painter, point_list, line_width, line_colour, fill_colour=None):
     # type: (QPainter, Iterable[Point], int, str, Optional[str]) -> None
     """Render optionally-filled polygon on canvas"""
-    pass
+    raise NotImplementedError
 
 
 def render_text(painter, text, point, font_size, font_colour, font_face='serif'):
     # type: (QPainter, str, Point, int, str, str) -> None
     """Render text on canvas, positioned with its bottom-left corner at given point"""
-    pass
+    raise NotImplementedError
 
 
 def render_image(painter, image, source_centre, source_window, canvas_center, canvas_size, rotation=None):
     # type: (QPainter, Image, Point, Size, Point, Size, Optional[int]) -> None
     """Render image or portion of it on canvas with optional rotation and scaling"""
-    pass
+    raise NotImplementedError
 
 
 class ObjectTypes(Enum):
@@ -171,18 +171,20 @@ class DrawingArea(QWidget):
         """Initialise a canvas with set width and height"""
         super().__init__(parent)
 
+        # General layout
+        self.__canvas_width = width
+        self.__canvas_height = height
+        self.setContentsMargins(NO_MARGINS)
+        self.setFixedSize(width, height)
+
         # Background colour setup
         self.__palette = QPalette()
         self.__palette.setColor(QPalette.Base, get_colour('black'))
         self.setAutoFillBackground(True)
         self.setBackgroundRole(QPalette.Base)
         self.setPalette(self.__palette)
-
-        # General layout
-        self.__canvas_width = width
-        self.__canvas_height = height
-        self.setContentsMargins(NO_MARGINS)
-        self.setFixedSize(width, height)
+        self.__background_colour = get_colour('black')
+        self.__reset_pixmap()
 
         # Drawing stuff
         self.__canvas = Canvas(self)
@@ -190,10 +192,6 @@ class DrawingArea(QWidget):
         self.__new_objects = []
         self.__draw_handler = None
         self.__draw_timer_id = -1
-        self.__painter = QPainter(self)
-        self.__painter.setRenderHint(
-            QPainter.RenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform))
-        self.__painter.save()
 
     def set_draw_handler(self, draw_handler):
         # type: (Callable[[Canvas], None]) -> None
@@ -210,6 +208,11 @@ class DrawingArea(QWidget):
             return super().timerEvent(event)
         self.__draw()
 
+    def __reset_pixmap(self):
+        """Set new pixmap filled with background colour"""
+        self.__pixmap = QPixmap(self.__canvas_width, self.__canvas_height)
+        self.__pixmap.fill(self.__background_colour)
+
     def __draw(self):
         """Call draw handler and re-render widget if necessary"""
         self.__new_objects = []
@@ -218,6 +221,13 @@ class DrawingArea(QWidget):
 
         if self.__new_objects != self.__objects:
             self.__objects = self.__new_objects
+            painter = QPainter(self.__pixmap)
+            painter.setRenderHint(
+                QPainter.RenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform))
+            painter.save()
+            for obj in self.__objects:
+                painter.restore()
+                OBJECT_RENDERERS[obj.obj_type](painter, *obj.args)
             self.update()
 
     def add_object(self, primitive):
@@ -229,15 +239,24 @@ class DrawingArea(QWidget):
         """Change the canvas background"""
         self.__palette.setColor(QPalette.Base, colour)
         self.setPalette(self.__palette)
+        self.__background_colour = colour
+        self.__reset_pixmap()
+        self.update()
 
     def paintEvent(self, event):
         # type: (QPaintEvent) -> None
         """Render all user-specified shapes on the canvas"""
-        self.__painter.begin(self)
-        for obj in self.__objects:
-            self.__painter.restore()
-            OBJECT_RENDERERS[obj.obj_type](self.__painter, *obj.args)
-        self.__painter.end()
+        painter = QPainter(self)
+        painter.drawPixmap(self.rect(), self.__pixmap)
+        # painter.setRenderHint(
+        #     QPainter.RenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform))
+        # painter.save()
+        # pixmap = QPixmap(300, 200)
+        # pixmap.fill()
+        # for obj in self.__objects:
+        #     self.__painter.restore()
+        #     OBJECT_RENDERERS[obj.obj_type](self.__painter, *obj.args)
+
 
 
 class DrawingAreaContainer(QWidget):
@@ -250,7 +269,8 @@ class DrawingAreaContainer(QWidget):
         # Set up colouring - default is a grey border around a black background
         self.setAutoFillBackground(True)
         palette = self.palette()
-        palette.setColor(QPalette.Dark, get_colour('grey'))
+        self.__background_colour = get_colour('black')
+        palette.setColor(QPalette.Dark, get_colour('darkgrey'))
         palette.setColor(QPalette.Shadow, get_colour('black'))
         self.setPalette(palette)
         self.setBackgroundRole(QPalette.Dark)
@@ -275,6 +295,10 @@ class DrawingAreaContainer(QWidget):
         # type: (str) -> None
         """Change the canvas background"""
         colour = get_colour(colour)
+        if colour == self.__background_colour:
+            return
+
+        self.__background_colour = colour
         self.__drawing_area.set_background_colour(colour)
         border = QPalette.Dark if colour is get_colour('black') else QPalette.Shadow
         self.setBackgroundRole(border)
