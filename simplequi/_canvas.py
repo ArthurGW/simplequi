@@ -31,9 +31,10 @@ from PySide2.QtGui import QPolygon
 from PySide2.QtWidgets import QWidget, QHBoxLayout
 from PySide2.QtGui import QPainter, QColor, QPaintEvent, QBrush, QPen, QPalette, QPixmap
 
-from _app import TheApp
+from _app import TheApp  # Ensure we have an app - IMPORTANT
 from _colours import get_colour
-from _constants import NO_MARGINS, SUPPORTED_FONT_FACES
+from _constants import NO_MARGINS
+from _fonts import get_font, FontSpec
 from _image import Image
 
 Point = Union[List[int], Tuple[int, int]]  # As lists are mutable typing doesn't let you specify no. of elements
@@ -147,7 +148,10 @@ def render_polygon(painter, point_list, line_width, line_colour, fill_colour=Non
 def render_text(painter, text, point, font_size, font_colour, font_face='serif'):
     # type: (QPainter, str, Point, int, str, str) -> None
     """Render text on canvas, positioned with its bottom-left corner at given point"""
-    raise NotImplementedError
+    set_painter_line_width_and_colour(painter, 1, font_colour)
+    font = get_font(FontSpec(font_size, font_face))
+    painter.setFont(font)
+    painter.drawText(*point, text)
 
 
 def render_image(painter, image, source_centre, source_window, canvas_center, canvas_size, rotation=None):
@@ -237,6 +241,7 @@ class DrawingArea(QWidget):
 
         if self.__new_objects != self.__objects:
             self.__objects = self.__new_objects
+            self.__reset_pixmap()
             painter = QPainter(self.__pixmap)
             painter.setRenderHint(
                 QPainter.RenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform))
@@ -334,9 +339,6 @@ class Canvas:
         The point is a 2-element tuple or list of screen coordinates representing the lower-left-hand corner of where to
         write the text.  The supported font faces are 'serif' (the default), 'sans-serif', and 'monospace'.
         """
-        if font_face not in SUPPORTED_FONT_FACES:
-            raise ValueError('invalid font face specified, valid options are {}'.format(SUPPORTED_FONT_FACES))
-
         self.__drawing_area.add_object(ObjectHolder(ObjectTypes.Text, (text, point, font_size, font_color, font_face)))
 
     def draw_line(self, point1, point2, line_width, line_color):

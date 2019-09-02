@@ -16,17 +16,25 @@ from _canvas import Canvas
 
 message = "Welcome!"
 
+faces = [
+    'serif',
+    'sans-serif',
+    'monospace'
+]
 
+i = 0
 # Handler for mouse click
 def click(v=None):
-    global message
+    global message, i
     message = "Good job!"
+    i += 1
+    i %= 3
 
 
 # Handler to draw on canvas
 def draw(canvas):
     # type: (Canvas) -> None
-    # canvas.draw_text(message, [50,112], 48, "Red")
+    global i
     canvas.draw_circle([150, 100], 99, 2, 'green', 'purple')
     canvas.draw_line([100, 0], [100, 199], 3, 'red')
     canvas.draw_point([150, 100], 'yellow')
@@ -37,6 +45,7 @@ def draw(canvas):
     canvas.draw_polyline([(0, 199), (150, 100), (150, 150)], 2, 'green')
     canvas.draw_polygon([(0, 100), (150, 50), (0, 50)], 2, 'green', 'blue')
     canvas.draw_arc([150, 100], 50, 0, math.pi / 2, 2, 'orange')
+    canvas.draw_text(message, [50,112], 48, "Red", faces[i])
 
 
 # Create a frame and assign callbacks to event handlers

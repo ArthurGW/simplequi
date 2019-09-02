@@ -25,4 +25,3 @@ DEFAULT_CONTROL_ENTRY_WIDTH = 200
 DEFAULT_FRAME_MARGIN = QMargins(*([20]*4))
 NO_MARGINS = QMargins()
 
-SUPPORTED_FONT_FACES = {'serif', 'sans-serif', 'monospace'}
