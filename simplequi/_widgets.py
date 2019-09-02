@@ -32,8 +32,9 @@ from PySide2.QtWidgets import QLabel, QPushButton, QPlainTextEdit, QWidget, QFra
 from _app import TheApp
 from _canvas import Canvas, DrawingAreaContainer
 from _colours import get_colour
-from _constants import DEFAULT_WIDGET_HEIGHT, DEFAULT_CONTROL_ENTRY_WIDTH, DEFAULT_FRAME_MARGIN, NO_MARGINS
+from _constants import DEFAULT_WIDGET_HEIGHT, DEFAULT_CONTROL_ENTRY_WIDTH, DEFAULT_FRAME_MARGIN, NO_MARGINS, Point
 from _fonts import get_text_width_for_font_spec, FontSpec
+from _keys import REVERSE_KEY_MAP
 
 
 class Control:
@@ -77,6 +78,10 @@ class PlainTextSingleLine(QPlainTextEdit):
     __caught_keys = {Qt.Key_Enter, Qt.Key_Return}
     enter_pressed = Signal(str)
 
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.setTabChangesFocus(True)
+
     def keyPressEvent(self, e):
         # type: (QKeyEvent) -> None
         """Ignore Enter/Return to prevent newlines"""
@@ -89,6 +94,7 @@ class PlainTextSingleLine(QPlainTextEdit):
         # type: (QKeyEvent) -> None
         """On Enter/Return, send signal to activate key input handler"""
         if e.key() in self.__caught_keys:
+            self.clearFocus()
             self.enter_pressed.emit(self.toPlainText())
             return
 
@@ -138,7 +144,6 @@ class ControlPanelWidget(QWidget):
         self.__insertion_point = 0  # Where new widgets are added
         self.setContentsMargins(NO_MARGINS)
         layout = QVBoxLayout()
-        layout.setSizeConstraint(QHBoxLayout.SetFixedSize)
         layout.setContentsMargins(NO_MARGINS)
         layout.addStretch()
 
@@ -150,6 +155,26 @@ class ControlPanelWidget(QWidget):
 
         self.setLayout(layout)
         self.__layout = layout
+
+    def on_keydown(self, key):
+        # type: (int) -> None
+        """Update the key widget"""
+        self.__key_widget.set_text('Down ' + REVERSE_KEY_MAP[key])
+
+    def on_keyup(self, key):
+        # type: (int) -> None
+        """Update the key widget"""
+        self.__key_widget.set_text('Up ' + REVERSE_KEY_MAP[key])
+
+    def on_mouseclick(self, coord):
+        # type: (Point) -> None
+        """Update the mouse widget"""
+        self.__mouse_widget.set_text('Click {}, {}'.format(*coord))
+
+    def on_mousedrag(self, coord):
+        # type: (Point) -> None
+        """Update the mouse widget"""
+        self.__mouse_widget.set_text('Move - {}, {}'.format(*coord))
 
     def __add_widget(self, widget):
         """Actually insert the widget to the layout"""
@@ -193,10 +218,10 @@ class ControlPanelWidget(QWidget):
 
 
 class Frame:
-    """Singleton Frame containing all other widgets
+    """Singleton Frame containing all other widgets.
 
     Note the singleton-ness in not strictly enforced here, but the module function 'reset_frame' is the only external
-    function that should be used to get Frames, and that simply resets the fixed instance of this class
+    function that should be used to get Frames, and that simply resets the fixed instance of this class.
     """
 
     __main_widget = None
@@ -242,6 +267,11 @@ class Frame:
         self.__main_layout.addWidget(self.__controls, alignment=Qt.Alignment(Qt.AlignLeft | Qt.AlignTop))
         self.__main_layout.addWidget(self.__drawing_area, alignment=Qt.AlignCenter)
         self.__main_widget.setLayout(self.__main_layout)
+
+        # Setup for key handling
+        self.__main_widget.setFocusProxy(self.__drawing_area.canvas)
+        self.__drawing_area.canvas.setFocus()
+
         if not first_init:
             self.__main_widget.show()
 
@@ -302,16 +332,18 @@ class Frame:
         """Add keyboard event handler waiting for keydown event.
 
         When any key is pressed, the keydown handler is called once. The handler should be defined with one parameter.
-        This parameter will receive an integer representing a keyboard character."""
-        raise NotImplementedError
+        This parameter will receive an integer representing a keyboard character.
+        """
+        self.__drawing_area.canvas.set_keydown_handler(key_handler, self.__controls.on_keydown)
 
     def set_keyup_handler(self, key_handler):
         # type: (Callable[[int], None]) -> None
         """Add keyboard event handler waiting for keyup event.
 
         When any key is released, the keyup handler is called once. The handler should be defined with one parameter.
-        This parameter will receive an integer representing a keyboard character."""
-        raise NotImplementedError
+        This parameter will receive an integer representing a keyboard character.
+        """
+        self.__drawing_area.canvas.set_keyup_handler(key_handler, self.__controls.on_keyup)
 
     def set_mouseclick_handler(self, mouse_handler):
         # type: (Callable[[tuple], None]) -> None
@@ -321,7 +353,7 @@ class Frame:
         should be defined with one parameter. This parameter will receive a pair of screen coordinates, i.e., a tuple of
         two non-negative integers.
         """
-        raise NotImplementedError
+        self.__drawing_area.canvas.set_mouseclick_handler(mouse_handler, self.__controls.on_mouseclick)
 
     def set_mousedrag_handler(self, mouse_handler):
         # type: (Callable[[Tuple[int, int]], None]) -> None
@@ -329,15 +361,16 @@ class Frame:
 
         When a mouse is dragged while the mouse button is being pressed, the mousedrag handler is called for each new
         mouse position. The handler should be defined with one parameter. This parameter will receive a pair of screen
-        coordinates, i.e., a tuple of two non-negative integers."""
-        raise NotImplementedError
+        coordinates, i.e., a tuple of two non-negative integers.
+        """
+        self.__drawing_area.canvas.set_mousedrag_handler(mouse_handler, self.__controls.on_mousedrag)
 
     def set_draw_handler(self, draw_handler):
         # type: (Callable[[Canvas], None]) -> None
         """Adds an event handler that is responsible for all drawing.
 
         The handler should be defined with one parameter. This parameter will receive a canvas object."""
-        self.__drawing_area.set_draw_handler(draw_handler)
+        self.__drawing_area.canvas.set_draw_handler(draw_handler)
 
 
 # Create singleton Frame with dummy params

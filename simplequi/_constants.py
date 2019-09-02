@@ -18,6 +18,8 @@
 # You should have received a copy of the GNU General Public License
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
+from typing import Union, List, Tuple
+
 from PySide2.QtCore import QMargins
 
 DEFAULT_WIDGET_HEIGHT = 25
@@ -25,3 +27,5 @@ DEFAULT_CONTROL_ENTRY_WIDTH = 200
 DEFAULT_FRAME_MARGIN = QMargins(*([20]*4))
 NO_MARGINS = QMargins()
 
+Point = Union[List[int], Tuple[int, int]]  # As lists are mutable typing doesn't let you specify no. of elements
+Size = Point  # Same signature but different named for clarity

@@ -54,6 +54,10 @@ frame.set_canvas_background('aqua')
 frame.add_button("Click me", click)
 l = frame.add_label('lAB1', 120)
 frame.add_input('INPgUT', l.set_text, 300)
+frame.set_keydown_handler(lambda x: None)
+frame.set_keyup_handler(lambda x: None)
+frame.set_mouseclick_handler(lambda x: None)
+frame.set_mousedrag_handler(lambda x: None)
 
 frame.set_draw_handler(draw)
 

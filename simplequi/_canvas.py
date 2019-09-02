@@ -22,24 +22,21 @@
 from collections import namedtuple
 from enum import auto, Enum
 from math import pi
-from typing import Callable, Union, Tuple, List
+from typing import Callable, Tuple
 from typing import Iterable
 from typing import Optional
 
-from PySide2.QtCore import Qt, QPoint
+from PySide2.QtCore import Qt, QPoint, Signal
+from PySide2.QtGui import QKeyEvent
+from PySide2.QtGui import QMouseEvent
 from PySide2.QtGui import QPolygon
 from PySide2.QtWidgets import QWidget, QHBoxLayout
 from PySide2.QtGui import QPainter, QColor, QPaintEvent, QBrush, QPen, QPalette, QPixmap
 
-from _app import TheApp  # Ensure we have an app - IMPORTANT
 from _colours import get_colour
-from _constants import NO_MARGINS
+from _constants import NO_MARGINS, Point
 from _fonts import get_font, FontSpec
 from _image import Image
-
-Point = Union[List[int], Tuple[int, int]]  # As lists are mutable typing doesn't let you specify no. of elements
-Size = Point  # Same signature but different named for clarity
-
 
 ObjectHolder = namedtuple('ObjectHolder', ['obj_type', 'args'])
 
@@ -184,7 +181,13 @@ OBJECT_RENDERERS = {
 
 
 class DrawingArea(QWidget):
-    """The widget that actually renders the desired canvas"""
+    """The widget that actually renders the desired canvas and handles events on it"""
+
+    # Signals emitted when events handled
+    mouseclick = Signal(tuple)
+    mousedrag = Signal(tuple)
+    keydown = Signal(int)
+    keyup = Signal(int)
 
     def __init__(self, parent, width, height):
         # type: (QWidget, int, int) -> None
@@ -213,6 +216,13 @@ class DrawingArea(QWidget):
         self.__draw_handler = None
         self.__draw_timer_id = -1
 
+        # Event stuff
+        self.__keydown_handler = None
+        self.__keyup_handler = None
+        self.__mouseclick_handler = None
+        self.__mousedrag_handler = None
+
+    # Drawing
     def set_draw_handler(self, draw_handler):
         # type: (Callable[[Canvas], None]) -> None
         """Set draw handler and begin rendering loop"""
@@ -278,6 +288,55 @@ class DrawingArea(QWidget):
         #     self.__painter.restore()
         #     OBJECT_RENDERERS[obj.obj_type](self.__painter, *obj.args)
 
+    # Events
+    @staticmethod
+    def __connect_handlers(signal, *handlers):
+        # type: (Signal, Iterable[Callable]) -> None
+        """Hook up signal to handlers"""
+        try:
+            signal.disconnect()
+        except RuntimeError:
+            # No connections
+            pass
+        for handler in handlers:
+            signal.connect(handler)
+
+    def set_keydown_handler(self, key_handler, controls_area_slot):
+        # type: (Callable[[int], None], Callable[[int], None]) -> None
+        """Add keyboard event handler waiting for keydown event"""
+        self.__connect_handlers(self.keydown, key_handler, controls_area_slot)
+
+    def set_keyup_handler(self, key_handler, controls_area_slot):
+        # type: (Callable[[int], None], Callable[[int], None]) -> None
+        """Add keyboard event handler waiting for keyup event"""
+        self.__connect_handlers(self.keyup, key_handler, controls_area_slot)
+
+    def set_mouseclick_handler(self, mouse_handler, controls_area_slot):
+        # type: (Callable[[tuple], None], Callable[[Tuple[int, int]], None]) -> None
+        """Add mouse event handler waiting for mouseclick event"""
+        self.__connect_handlers(self.mouseclick, mouse_handler, controls_area_slot)
+
+    def set_mousedrag_handler(self, mouse_handler, controls_area_slot):
+        # type: (Callable[[Tuple[int, int]], None], Callable[[Tuple[int, int]], None]) -> None
+        """Add mouse event handler waiting for mousedrag event"""
+        self.__connect_handlers(self.mousedrag, mouse_handler, controls_area_slot)
+
+    def keyPressEvent(self, event):
+        # type: (QKeyEvent) -> None
+        self.keydown.emit(int(event.key()))
+
+    def keyReleaseEvent(self, event):
+        # type: (QKeyEvent) -> None
+        self.keyup.emit(int(event.key()))
+
+    def mouseReleaseEvent(self, event):
+        # type: (QMouseEvent) -> None
+        self.mouseclick.emit(event.pos().toTuple())
+
+    def mouseMoveEvent(self, event):
+        # type: (QMouseEvent) -> None
+        self.mousedrag.emit(event.pos().toTuple())
+
 
 class DrawingAreaContainer(QWidget):
     """Draws a border around the actual drawing area"""
@@ -306,10 +365,12 @@ class DrawingAreaContainer(QWidget):
         layout.addWidget(self.__drawing_area, alignment=Qt.AlignCenter)
         self.setLayout(layout)
 
-    def set_draw_handler(self, draw_handler):
-        # type: (Callable[[Canvas], None]) -> None
-        """Set draw handler for drawing area"""
-        self.__drawing_area.set_draw_handler(draw_handler)
+        # Allow focus for event handling
+        self.setFocusPolicy(Qt.StrongFocus)
+
+    @property
+    def canvas(self):
+        return self.__drawing_area
 
     def set_background_colour(self, colour):
         # type: (str) -> None
