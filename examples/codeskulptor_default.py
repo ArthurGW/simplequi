@@ -38,7 +38,7 @@ def draw(canvas):
 
 
 # Create a frame and assign callbacks to event handlers
-frame = simplegui.create_frame("Home", 800, 600)
+frame = simplegui.create_frame("Home", 300, 200)
 frame.set_canvas_background('aqua')
 frame.add_button("Click me", click)
 l = frame.add_label('lAB1', 120)

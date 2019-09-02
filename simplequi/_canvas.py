@@ -170,11 +170,18 @@ class DrawingArea(QWidget):
         # type: (QWidget, int, int) -> None
         """Initialise a canvas with set width and height"""
         super().__init__(parent)
-        self.setContentsMargins(NO_MARGINS)
-        self.__background_colour = get_colour('black')
 
+        # Background colour setup
+        self.__palette = QPalette()
+        self.__palette.setColor(QPalette.Base, get_colour('black'))
+        self.setAutoFillBackground(True)
+        self.setBackgroundRole(QPalette.Base)
+        self.setPalette(self.__palette)
+
+        # General layout
         self.__canvas_width = width
         self.__canvas_height = height
+        self.setContentsMargins(NO_MARGINS)
         self.setFixedSize(width, height)
 
         # Drawing stuff
@@ -183,6 +190,10 @@ class DrawingArea(QWidget):
         self.__new_objects = []
         self.__draw_handler = None
         self.__draw_timer_id = -1
+        self.__painter = QPainter(self)
+        self.__painter.setRenderHint(
+            QPainter.RenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform))
+        self.__painter.save()
 
     def set_draw_handler(self, draw_handler):
         # type: (Callable[[Canvas], None]) -> None
@@ -216,20 +227,17 @@ class DrawingArea(QWidget):
     def set_background_colour(self, colour):
         # type: (QColor) -> None
         """Change the canvas background"""
-        self.__background_colour = colour
+        self.__palette.setColor(QPalette.Base, colour)
+        self.setPalette(self.__palette)
 
     def paintEvent(self, event):
         # type: (QPaintEvent) -> None
         """Render all user-specified shapes on the canvas"""
-        painter = QPainter(self)
-        painter.setRenderHint(
-            QPainter.RenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform),
-            True)
-        painter.fillRect(0, 0, self.__canvas_width, self.__canvas_height, self.__background_colour)
+        self.__painter.begin(self)
         for obj in self.__objects:
-            painter.save()
-            OBJECT_RENDERERS[obj.obj_type](painter, *obj.args)
-            painter.restore()
+            self.__painter.restore()
+            OBJECT_RENDERERS[obj.obj_type](self.__painter, *obj.args)
+        self.__painter.end()
 
 
 class DrawingAreaContainer(QWidget):
