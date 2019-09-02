@@ -10,6 +10,7 @@
 
 
 import simplequi as simplegui
+
 import math
 
 from _canvas import Canvas
@@ -23,6 +24,8 @@ faces = [
 ]
 
 i = 0
+
+
 # Handler for mouse click
 def click(v=None):
     global message, i
@@ -52,6 +55,7 @@ def draw(canvas):
 frame = simplegui.create_frame("Home", 300, 200)
 frame.set_canvas_background('aqua')
 frame.add_button("Click me", click)
+# frame = simplegui.create_frame("Home", 300, 500)
 l = frame.add_label('lAB1', 120)
 frame.add_input('INPgUT', l.set_text, 300)
 frame.set_keydown_handler(lambda x: None)

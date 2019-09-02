@@ -222,6 +222,9 @@ class DrawingArea(QWidget):
         self.__mouseclick_handler = None
         self.__mousedrag_handler = None
 
+        # Allow focus for event handling
+        self.setFocusPolicy(Qt.StrongFocus)
+
     # Drawing
     def set_draw_handler(self, draw_handler):
         # type: (Callable[[Canvas], None]) -> None
@@ -365,8 +368,7 @@ class DrawingAreaContainer(QWidget):
         layout.addWidget(self.__drawing_area, alignment=Qt.AlignCenter)
         self.setLayout(layout)
 
-        # Allow focus for event handling
-        self.setFocusPolicy(Qt.StrongFocus)
+        self.setFocusProxy(self.__drawing_area)
 
     @property
     def canvas(self):

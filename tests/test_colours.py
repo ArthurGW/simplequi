@@ -21,7 +21,7 @@
 
 import unittest
 
-from simplequi._colours import get_colour, COLOUR_MAP
+from simplequi._colours import get_colour, COLOUR_MAP, DEFAULT_COLOURS
 
 
 class TestColours(unittest.TestCase):
@@ -143,23 +143,7 @@ class TestColours(unittest.TestCase):
     def test_named_colours(self):
         """Test valid and invalid named colours"""
         # First test listed colours were all created
-        for colour_name in ['Aqua',
-                            'Black',
-                            'Blue',
-                            'Fuchsia',
-                            'Gray',
-                            'Green',
-                            'Lime',
-                            'Maroon',
-                            'Navy',
-                            'Olive',
-                            'Orange',
-                            'Purple',
-                            'Red',
-                            'Silver',
-                            'Teal',
-                            'White',
-                            'Yellow']:
+        for colour_name in DEFAULT_COLOURS:
             self.assertIn(colour_name, COLOUR_MAP)
 
         # Other legal colour names

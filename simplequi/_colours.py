@@ -54,7 +54,7 @@ class ColourTypes(Enum):
 COLOUR_MAP = {}
 
 # Cache some default colours named in codeskulptor docs
-for colour_name in ['Aqua',
+DEFAULT_COLOURS = ['Aqua',
                     'Black',
                     'Blue',
                     'Fuchsia',
@@ -70,7 +70,9 @@ for colour_name in ['Aqua',
                     'Silver',
                     'Teal',
                     'White',
-                    'Yellow']:
+                    'Yellow']
+
+for colour_name in DEFAULT_COLOURS:
     if QColor.isValidColor(colour_name):
         COLOUR_MAP[colour_name] = QColor(colour_name)
     else:

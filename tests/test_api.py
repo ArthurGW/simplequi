@@ -21,7 +21,10 @@
 
 import unittest
 
+from PySide2.QtCore import Qt
+
 import simplequi
+from simplequi._keys import REVERSE_KEY_MAP
 
 
 class MyTestCase(unittest.TestCase):
@@ -39,11 +42,29 @@ class MyTestCase(unittest.TestCase):
             self.assertRaises(NotImplementedError, func, *args)
 
     def test_key_map(self):
-        """Just test by length all keys are in map and currently None"""
+        """Test all keys in map and reverse mapped to same value"""
         self.assertEqual(67, len(simplequi.KEY_MAP))
 
+        special_keys = {
+            'left': '⭠',
+            'right': '⭢',
+            'up': '⭡',
+            'down': '⭣'
+        }
+
+        # Test known keys
         for key, val in simplequi.KEY_MAP.items():
-            self.assertIsNone(val, 'key \'{}\' does not have value \'None\''.format(key))
+            if key in special_keys:
+                self.assertEqual(special_keys[key], REVERSE_KEY_MAP[val], 'mismatch in forward and reverse key maps')
+            else:
+                self.assertEqual(key, REVERSE_KEY_MAP[val], 'mismatch in forward and reverse key maps')
+
+        # Test unknown keys
+        for key in {Qt.Key_Enter, Qt.Key_Backspace, Qt.Key_Tab}:
+            self.assertNotIn(key, REVERSE_KEY_MAP)
+            self.assertEqual(REVERSE_KEY_MAP[key], '<{}>'.format(key))
+            self.assertIn(key, REVERSE_KEY_MAP)
+
 
     def test_create_frame(self):
         self.assertIs(simplequi.create_frame('Old Title', 200, 120), simplequi.create_frame('Title', 100, 100))

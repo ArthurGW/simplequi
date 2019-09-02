@@ -28,4 +28,4 @@ DEFAULT_FRAME_MARGIN = QMargins(*([20]*4))
 NO_MARGINS = QMargins()
 
 Point = Union[List[int], Tuple[int, int]]  # As lists are mutable typing doesn't let you specify no. of elements
-Size = Point  # Same signature but different named for clarity
+Size = Point  # Same signature but different name for clarity

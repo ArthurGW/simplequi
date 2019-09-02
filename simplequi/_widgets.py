@@ -19,15 +19,15 @@
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
+import sys
 from typing import Callable
 from typing import Optional
 from typing import Tuple
-import sys
 
-from PySide2.QtCore import Qt, Signal, QTimer
+from PySide2.QtCore import Qt, Signal
 from PySide2.QtGui import QTextOption, QKeyEvent
-from PySide2.QtWidgets import QLabel, QPushButton, QPlainTextEdit, QWidget, QFrame, QHBoxLayout, QVBoxLayout, \
-    QSizePolicy
+from PySide2.QtWidgets import (QLabel, QPushButton, QPlainTextEdit, QWidget,
+                               QFrame, QHBoxLayout, QVBoxLayout, QSizePolicy)
 
 from _app import TheApp
 from _canvas import Canvas, DrawingAreaContainer
@@ -94,7 +94,7 @@ class PlainTextSingleLine(QPlainTextEdit):
         # type: (QKeyEvent) -> None
         """On Enter/Return, send signal to activate key input handler"""
         if e.key() in self.__caught_keys:
-            self.clearFocus()
+            self.focusNextChild()
             self.enter_pressed.emit(self.toPlainText())
             return
 
@@ -118,9 +118,12 @@ class TextInputWidget(QWidget):
         layout = QVBoxLayout(self)
         layout.setSpacing(1)
         layout.setContentsMargins(NO_MARGINS)
+        layout.setSizeConstraint(QVBoxLayout.SetFixedSize)
         layout.addWidget(self.__label)
         layout.addWidget(self.__input)
         self.setLayout(layout)
+
+        self.setFocusProxy(self.__input)
 
     # Duplicate Qt API for buttons and labels to simplify Control class wrapper
     def text(self):
@@ -270,6 +273,7 @@ class Frame:
 
         # Setup for key handling
         self.__main_widget.setFocusProxy(self.__drawing_area.canvas)
+        self.__main_widget.setFocusPolicy(Qt.StrongFocus)
         self.__drawing_area.canvas.setFocus()
 
         if not first_init:
