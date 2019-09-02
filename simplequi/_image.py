@@ -23,6 +23,7 @@
 class Image:
     def __init__(self):
         raise NotImplementedError()
+        # TODO: implement
 
     @classmethod
     def load_image_from_url(cls, url):

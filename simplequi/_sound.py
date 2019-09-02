@@ -23,6 +23,7 @@
 class Sound:
     def __init__(self):
         raise NotImplementedError()
+        # TODO: implement
 
     @classmethod
     def load_sound_from_url(cls, url):

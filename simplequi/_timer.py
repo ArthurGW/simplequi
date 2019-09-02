@@ -30,3 +30,5 @@ class Timer:
         """Create a new timer with the given interval and timeout handler"""
         # type: (int, Callable[[], None]) -> None
         raise NotImplementedError()
+        # TODO: implement
+

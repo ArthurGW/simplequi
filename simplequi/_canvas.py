@@ -54,7 +54,6 @@ def point_list_to_polygon(point_list):
     polygon = QPolygon(num_points)
     for point in point_list:
         polygon.push_back(QPoint(*point))
-    # polygon.setPoints(num_points, (coord for point in point_list for coord in point))
     return polygon
 
 
@@ -155,6 +154,7 @@ def render_image(painter, image, source_centre, source_window, canvas_center, ca
     # type: (QPainter, Image, Point, Size, Point, Size, Optional[int]) -> None
     """Render image or portion of it on canvas with optional rotation and scaling"""
     raise NotImplementedError
+    # TODO: implement
 
 
 class ObjectTypes(Enum):
