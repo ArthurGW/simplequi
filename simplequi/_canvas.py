@@ -26,7 +26,8 @@ from typing import Callable, Union, Tuple, List
 from typing import Iterable
 from typing import Optional
 
-from PySide2.QtCore import Qt
+from PySide2.QtCore import Qt, QPoint
+from PySide2.QtGui import QPolygon
 from PySide2.QtWidgets import QWidget, QHBoxLayout
 from PySide2.QtGui import QPainter, QColor, QPaintEvent, QBrush, QPen, QPalette, QPixmap
 
@@ -46,6 +47,17 @@ def radians_to_qpainter_angle(rads):
     # type: (float) -> int
     """Convert an angle in radians to one in 1/16ths of degrees as used by QPainter"""
     return int(360 * 16 * rads / (2 * pi))
+
+
+def point_list_to_polygon(point_list):
+    # type: (Iterable[Point]) -> QPolygon
+    """Converts an iterable of (x, y) points coordinates to a QPolygon suitable for rendering"""
+    num_points = len(point_list)
+    polygon = QPolygon(num_points)
+    for point in point_list:
+        polygon.push_back(QPoint(*point))
+    # polygon.setPoints(num_points, (coord for point in point_list for coord in point))
+    return polygon
 
 
 def set_painter_line_width_and_colour(painter, line_width, line_colour):
@@ -119,13 +131,17 @@ def render_point(painter, point, colour):
 def render_polyline(painter, point_list, line_width, line_colour):
     # type: (QPainter, Iterable[Point], int, str) -> None
     """Render polyline on canvas"""
-    raise NotImplementedError
+    set_painter_line_width_and_colour(painter, line_width, line_colour)
+    polygon = point_list_to_polygon(point_list)
+    painter.drawPolyline(polygon)
 
 
 def render_polygon(painter, point_list, line_width, line_colour, fill_colour=None):
     # type: (QPainter, Iterable[Point], int, str, Optional[str]) -> None
     """Render optionally-filled polygon on canvas"""
-    raise NotImplementedError
+    set_painter_lines_and_fill(painter, line_width, line_colour, fill_colour)
+    polygon = point_list_to_polygon(point_list)
+    painter.drawPolygon(polygon)
 
 
 def render_text(painter, text, point, font_size, font_colour, font_face='serif'):
@@ -256,7 +272,6 @@ class DrawingArea(QWidget):
         # for obj in self.__objects:
         #     self.__painter.restore()
         #     OBJECT_RENDERERS[obj.obj_type](self.__painter, *obj.args)
-
 
 
 class DrawingAreaContainer(QWidget):

@@ -203,7 +203,6 @@ class Frame:
     def __init__(self, title, canvas_width, canvas_height, control_width=None):
         # type: (str, int, int, Optional[int]) -> None
         """Create a frame"""
-        # Actually setup the UI
         self.__reset(title, canvas_width, canvas_height, control_width)
 
     def __init_main_widget(self):
@@ -211,6 +210,39 @@ class Frame:
         # self.__main_widget.setAttribute(Qt.WA_DeleteOnClose)
         # self.__main_widget.setAttribute(Qt.WA_QuitOnClose, False)
         # self.__main_widget.setWindowModality(Qt.WindowModal)
+
+    # Internal
+    def __reset(self, title, canvas_width, canvas_height, control_width=None):
+        # type: (str, int, int, Optional[int]) -> None
+        """Destroys all widgets associated with this frame, stops handlers running, sets params to new values"""
+        first_init = self.__main_widget is None
+        if not first_init:
+            self.__main_widget.deleteLater()
+        self.__init_main_widget()
+
+        # Basic window layout
+        self.__main_widget.setWindowTitle(title)
+        self.__main_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        palette = self.__main_widget.palette()
+        palette.setColor(palette.Window, get_colour('white'))
+        self.__main_widget.setPalette(palette)
+
+        # Widgets layout
+        self.__main_layout = QHBoxLayout()
+        self.__main_layout.setSizeConstraint(QHBoxLayout.SetFixedSize)
+        self.__main_layout.setSpacing(DEFAULT_FRAME_MARGIN.left())
+        self.__main_layout.setContentsMargins(DEFAULT_FRAME_MARGIN)
+        self.__controls = ControlPanelWidget(self.__main_widget, canvas_height, control_width)
+        self.__drawing_area = DrawingAreaContainer(self.__main_widget, canvas_width, canvas_height)
+
+        total_height = self.__drawing_area.height() + DEFAULT_FRAME_MARGIN.top() * 2
+        self.__main_widget.setFixedHeight(total_height)
+
+        self.__main_layout.addWidget(self.__controls, alignment=Qt.Alignment(Qt.AlignLeft | Qt.AlignTop))
+        self.__main_layout.addWidget(self.__drawing_area, alignment=Qt.AlignCenter)
+        self.__main_widget.setLayout(self.__main_layout)
+        if not first_init:
+            self.__main_widget.show()
 
     def set_canvas_background(self, colour):
         # type: (str) -> None
@@ -305,39 +337,6 @@ class Frame:
 
         The handler should be defined with one parameter. This parameter will receive a canvas object."""
         self.__drawing_area.set_draw_handler(draw_handler)
-
-    # Internal
-    def __reset(self, title, canvas_width, canvas_height, control_width=None):
-        # type: (str, int, int, Optional[int]) -> None
-        """Destroys all widgets associated with this frame, stops handlers running, sets params to new values"""
-        first_init = self.__main_widget is None
-        if not first_init:
-            self.__main_widget.deleteLater()
-        self.__init_main_widget()
-
-        # Basic window layout
-        self.__main_widget.setWindowTitle(title)
-        self.__main_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        palette = self.__main_widget.palette()
-        palette.setColor(palette.Window, get_colour('white'))
-        self.__main_widget.setPalette(palette)
-
-        # Widgets layout
-        self.__main_layout = QHBoxLayout()
-        self.__main_layout.setSizeConstraint(QHBoxLayout.SetFixedSize)
-        self.__main_layout.setSpacing(DEFAULT_FRAME_MARGIN.left())
-        self.__main_layout.setContentsMargins(DEFAULT_FRAME_MARGIN)
-        self.__controls = ControlPanelWidget(self.__main_widget, canvas_height, control_width)
-        self.__drawing_area = DrawingAreaContainer(self.__main_widget, canvas_width, canvas_height)
-
-        total_height = self.__drawing_area.height() + DEFAULT_FRAME_MARGIN.top() * 2
-        self.__main_widget.setFixedHeight(total_height)
-
-        self.__main_layout.addWidget(self.__controls, alignment=Qt.Alignment(Qt.AlignLeft | Qt.AlignTop))
-        self.__main_layout.addWidget(self.__drawing_area, alignment=Qt.AlignCenter)
-        self.__main_widget.setLayout(self.__main_layout)
-        if not first_init:
-            self.__main_widget.show()
 
 
 # Create singleton Frame with dummy params
