@@ -45,7 +45,7 @@ def draw(canvas):
     canvas.draw_polyline([(0, 199), (150, 100), (150, 150)], 2, 'green')
     canvas.draw_polygon([(0, 100), (150, 50), (0, 50)], 2, 'green', 'blue')
     canvas.draw_arc([150, 100], 50, 0, math.pi / 2, 2, 'orange')
-    canvas.draw_text(message, [50,112], 48, "Red", faces[i])
+    canvas.draw_text(message, [0, 199], 48, "Red", faces[i])
 
 
 # Create a frame and assign callbacks to event handlers

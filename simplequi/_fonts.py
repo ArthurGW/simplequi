@@ -28,10 +28,11 @@ import os
 from PySide2.QtCore import QRect
 from PySide2.QtGui import QFont, QFontMetrics, QFontDatabase
 
-from _app import TheApp
+# Change the default monospace font to one a bit less wide than Courier New
 file_path = __file__
-font_path = os.path.join(os.path.dirname(file_path), 'Fonts', 'NK57 Monospace', 'nk57-monospace-cd-rg.ttf')
+font_path = os.path.join(os.path.dirname(file_path), 'Fonts', 'NK57 Monospace', 'nk57-monospace-sc-rg.ttf')
 monospace = QFontDatabase.addApplicationFont(font_path)
+
 
 class FontFace(Enum):
     serif = 'serif'
@@ -70,16 +71,6 @@ def _check_is_valid_font(font_spec):
     """Raises ValueError if font spec could not be used on the canvas"""
     if font_spec.size <= 0:
         raise ValueError('invalid font size')
-
-
-def _set_font_scales():
-    """Qt fonts come out larger than codeskulptor, so get some factors to scale them down"""
-    serif_width = get_text_width_for_font_spec('Welcome!', FontSpec(48, 'serif'))
-    target_width = 95  # Rought pixel width of this font and text in the browser
-    scale = serif_width / target_width
-    FONT_SCALES[FontFace.serif] = scale
-    FONT_SCALES[FontFace.sans] = scale
-    FONT_SCALES[FontFace.monospace] = scale
 
 
 def get_font(font_spec):
