@@ -102,9 +102,3 @@ def get_text_width_for_font_spec(text, font_spec):
     """Return the width in pixels of the given text for the given font spec"""
     rect = _get_text_rect_for_font_spec(text, font_spec)
     return rect.width()
-
-
-# Cache size 12 fonts
-for font_face in FontFace:
-    spec = FontSpec(12, font_face.value)
-    get_font(spec)
