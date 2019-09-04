@@ -24,4 +24,3 @@ from _api import *
 
 __all__ = _api.__all__
 __version__ = '0.4.1'
-

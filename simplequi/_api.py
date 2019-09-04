@@ -25,7 +25,7 @@ The returned objects from these functions all implement their own APIs defined i
 from typing import Callable
 from typing import Optional
 
-from _widgets import reset_frame
+from _frame import reset_frame
 from _image import Image
 from _keys import KEY_MAP
 from _sound import Sound
