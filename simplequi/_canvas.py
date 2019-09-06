@@ -21,6 +21,7 @@
 
 from collections import namedtuple
 from enum import auto, Enum
+from functools import wraps
 from math import pi
 from typing import Callable, Tuple
 from typing import Iterable
@@ -180,6 +181,18 @@ OBJECT_RENDERERS = {
 }
 
 
+def check_started(func):
+    """Decorator that will only run enclosed function if the object has 'started'"""
+
+    @wraps(func)
+    def inner(inner_self, *args, **kwargs):
+        if not inner_self.started:
+            return
+        return func(inner_self, *args, **kwargs)
+
+    return inner
+
+
 class DrawingArea(QWidget):
     """The widget that actually renders the desired canvas and handles events on it"""
 
@@ -217,6 +230,7 @@ class DrawingArea(QWidget):
         self.__draw_timer_id = -1
 
         # Event stuff
+        self.__started = False
         self.__keydown_handler = None
         self.__keyup_handler = None
         self.__mouseclick_handler = None
@@ -233,7 +247,8 @@ class DrawingArea(QWidget):
             self.killTimer(self.__draw_timer_id)
 
         self.__draw_handler = draw_handler
-        self.__draw_timer_id = self.startTimer(17)
+        if self.__started:
+            self.__draw_timer_id = self.startTimer(17)  # Roughly 60FPS
 
     def timerEvent(self, event):
         """Draw if this is the draw timer, otherwise ignore"""
@@ -246,10 +261,10 @@ class DrawingArea(QWidget):
         self.__pixmap = QPixmap(self.__canvas_width, self.__canvas_height)
         self.__pixmap.fill(self.__background_colour)
 
+    @check_started
     def __draw(self):
         """Call draw handler and re-render widget if necessary"""
         self.__new_objects = []
-
         self.__draw_handler(self.__canvas)
 
         if self.__new_objects != self.__objects:
@@ -277,6 +292,7 @@ class DrawingArea(QWidget):
         self.__reset_pixmap()
         self.update()
 
+    @check_started
     def paintEvent(self, event):
         # type: (QPaintEvent) -> None
         """Render all user-specified shapes on the canvas"""
@@ -292,6 +308,18 @@ class DrawingArea(QWidget):
         #     OBJECT_RENDERERS[obj.obj_type](self.__painter, *obj.args)
 
     # Events
+    def start(self):
+        """Commence event handling and drawing"""
+        self.__started = True
+
+        # Start the draw timer if a handler exists
+        if self.__draw_handler is not None:
+            self.set_draw_handler(self.__draw_handler)
+
+    @property
+    def started(self):
+        return self.__started
+
     @staticmethod
     def __connect_handlers(signal, *handlers):
         # type: (Signal, Iterable[Callable]) -> None
@@ -324,18 +352,22 @@ class DrawingArea(QWidget):
         """Add mouse event handler waiting for mousedrag event"""
         self.__connect_handlers(self.mousedrag, mouse_handler, controls_area_slot)
 
+    @check_started
     def keyPressEvent(self, event):
-        # type: (QKeyEvent) -> None
+        # type: (QKeyEvent) -> None:
         self.keydown.emit(int(event.key()))
 
+    @check_started
     def keyReleaseEvent(self, event):
         # type: (QKeyEvent) -> None
         self.keyup.emit(int(event.key()))
 
+    @check_started
     def mouseReleaseEvent(self, event):
         # type: (QMouseEvent) -> None
         self.mouseclick.emit(event.pos().toTuple())
 
+    @check_started
     def mouseMoveEvent(self, event):
         # type: (QMouseEvent) -> None
         self.mousedrag.emit(event.pos().toTuple())

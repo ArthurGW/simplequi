@@ -19,6 +19,8 @@
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
+import atexit
+
 from PySide2.QtWidgets import QApplication
 
 
@@ -28,6 +30,9 @@ class _AppWithRunningFlag(QApplication):
     def __init__(self):
         super().__init__([])
         self.__is_running = False
+
+        # Always run the app, once the setup script is done
+        atexit.register(self.exec_)
 
     def exec_(self):
         super().exec_()
@@ -39,6 +44,4 @@ class _AppWithRunningFlag(QApplication):
 
 
 TheApp = _AppWithRunningFlag()
-
-
-
+del _AppWithRunningFlag

@@ -96,10 +96,8 @@ class Frame:
         self.__drawing_area.set_background_colour(colour)
 
     def start(self):
-        """Commence event handling on the frame.
-
-        Note that since this enters the event loop, this should always be the last statement in a script. Nothing after
-        this will actually be run.
+        """Commence event handling on the frame (actually on the canvas that handles the events)"""
+        self.__drawing_area.canvas.start()
 
         TODO: change this behaviour somehow...
         """
