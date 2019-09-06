@@ -30,8 +30,9 @@ class _AppWithRunningFlag(QApplication):
         self.__is_running = False
 
     def exec_(self):
-        super().exec_()
-        self.__is_running = True
+        if not self.is_running:
+            self.__is_running = True
+            super().exec_()
 
     @property
     def is_running(self):

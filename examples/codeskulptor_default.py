@@ -9,7 +9,7 @@
 # Chrome, Firefox, and Safari.
 
 
-import simplequi as simplegui
+from simplequi import create_frame
 
 import math
 
@@ -32,6 +32,7 @@ def click(v=None):
     message = "Good job!"
     i += 1
     i %= 3
+    print('afasf')
 
 
 # Handler to draw on canvas
@@ -49,10 +50,11 @@ def draw(canvas):
     canvas.draw_polygon([(0, 100), (150, 50), (0, 50)], 2, 'green', 'blue')
     canvas.draw_arc([150, 100], 50, 0, math.pi / 2, 2, 'orange')
     canvas.draw_text(message, [0, 199], 48, "Red", faces[i])
+    print('asasf')
 
 
 # Create a frame and assign callbacks to event handlers
-frame = simplegui.create_frame("Home", 300, 200)
+frame = create_frame("Home", 300, 200)
 frame.set_canvas_background('aqua')
 frame.add_button("Click me", click)
 # frame = simplegui.create_frame("Home", 300, 500)
@@ -67,3 +69,6 @@ frame.set_draw_handler(draw)
 
 # Start the frame animation
 frame.start()
+frame.add_button("Click me", click)
+frame.add_button("Click me", click)
+frame.add_button("Click me", click)
