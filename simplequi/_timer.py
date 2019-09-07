@@ -20,7 +20,7 @@
 # -----------------------------------------------------------------------------
 from typing import Callable
 
-from _app import TheApp
+from ._app import TheApp
 
 from PySide2.QtCore import QTimer
 

@@ -22,11 +22,11 @@
 from PySide2.QtCore import Qt, QTimer, Signal
 from PySide2.QtWidgets import QWidget, QSizePolicy, QHBoxLayout
 
-from _canvas import DrawingAreaContainer
-from _colours import get_colour
-from _constants import DEFAULT_FRAME_MARGIN
-from _fonts import get_text_width_for_font_spec, FontSpec
-from _widgets import ControlPanelWidget
+from ._canvas import DrawingAreaContainer
+from ._colours import get_colour
+from ._constants import DEFAULT_FRAME_MARGIN
+from ._fonts import get_text_width_for_font_spec, FontSpec
+from ._widgets import ControlPanelWidget
 
 
 class MainWidget(QWidget):

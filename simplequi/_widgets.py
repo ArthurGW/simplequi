@@ -27,8 +27,8 @@ from PySide2.QtGui import QTextOption, QKeyEvent
 from PySide2.QtWidgets import (QLabel, QPushButton, QPlainTextEdit, QWidget,
                                QFrame, QVBoxLayout)
 
-from _constants import DEFAULT_WIDGET_HEIGHT, DEFAULT_CONTROL_ENTRY_WIDTH, NO_MARGINS, Point
-from _keys import REVERSE_KEY_MAP
+from ._constants import DEFAULT_WIDGET_HEIGHT, DEFAULT_CONTROL_ENTRY_WIDTH, NO_MARGINS, Point
+from ._keys import REVERSE_KEY_MAP
 
 
 class Control:

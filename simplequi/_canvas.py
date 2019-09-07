@@ -34,10 +34,10 @@ from PySide2.QtGui import QPolygon
 from PySide2.QtWidgets import QWidget, QHBoxLayout
 from PySide2.QtGui import QPainter, QColor, QPaintEvent, QBrush, QPen, QPalette, QPixmap
 
-from _colours import get_colour
-from _constants import NO_MARGINS, Point
-from _fonts import get_font, FontSpec
-from _image import Image
+from ._colours import get_colour
+from ._constants import NO_MARGINS, Point
+from ._fonts import get_font, FontSpec
+from ._image import Image
 
 ObjectHolder = namedtuple('ObjectHolder', ['obj_type', 'args'])
 

@@ -41,8 +41,13 @@ class _AppWithRunningFlag(QApplication):
         atexit.register(self.exec_)
 
     def exec_(self):
-        self.__is_running = True
-        super().exec_()
+        if not self.is_running:
+            self.__is_running = True
+            super().exec_()
+
+    def exit(self, retcode):
+        self.__is_running = False
+        super().exit(retcode)
 
     @property
     def is_running(self):
@@ -57,9 +62,9 @@ class _AppWithRunningFlag(QApplication):
         self.timers.remove(timer)
         self.__queue_check_for_exit()
 
-    def __queue_check_for_exit(self):
+    def __queue_check_for_exit(self, wait=100):
         """Check whether to exit, but return to event loop first to allow queued deletions to take place"""
-        QTimer.singleShot(100, self.__check_for_exit)
+        QTimer.singleShot(wait, self.__check_for_exit)
 
     def __check_for_exit(self):
         """If no timers or frames exist, it is time to stop"""
@@ -68,5 +73,8 @@ class _AppWithRunningFlag(QApplication):
             self.exit(0)
 
 
-TheApp = _AppWithRunningFlag()
+if not QApplication.instance():
+    TheApp = _AppWithRunningFlag()
+else:
+    TheApp = QApplication.instance()
 del _AppWithRunningFlag  # Prevent non-singleton

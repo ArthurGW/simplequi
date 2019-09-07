@@ -25,11 +25,11 @@ The returned objects from these functions all implement their own APIs defined i
 from typing import Callable
 from typing import Optional
 
-from _frame import reset_frame
-from _image import Image
-from _keys import KEY_MAP
-from _sound import Sound
-from _timer import Timer
+from ._frame import reset_frame
+from ._image import Image
+from ._keys import KEY_MAP
+from ._sound import Sound
+from ._timer import Timer
 
 __all__ = ['KEY_MAP',
            'create_frame',
