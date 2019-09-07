@@ -63,6 +63,25 @@ frame.set_keyup_handler(lambda x: None)
 frame.set_mouseclick_handler(lambda x: None)
 frame.set_mousedrag_handler(lambda x: None)
 
+calls = 0
+
+def p():
+    global calls, t
+    calls += 1
+    print
+    'hello'
+    if calls % 10 == 0:
+        t.stop()
+        print('stop')
+        t.start()
+        print('start')
+        if calls % 30 == 0:
+            print('real stop')
+            t.stop()
+
+t = simplegui.create_timer(500, p)
+
+t.start()
 frame.set_draw_handler(draw)
 
 # Start the frame animation

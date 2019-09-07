@@ -19,13 +19,13 @@
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
-from os import path
+import os
 from setuptools import setup
 
-this_dir = path.dirname(__file__)
-readme_path = path.join(this_dir, 'README.md')
+this_dir = os.path.dirname(__file__)
+readme_path = os.path.join(this_dir, 'README.md')
 
-with open(readme_path, 'w') as readme_file:
+with open(readme_path, 'r') as readme_file:
     README = readme_file.read()
 
 setup(
