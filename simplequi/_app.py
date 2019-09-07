@@ -51,16 +51,15 @@ class _AppWithRunningFlag(QApplication):
     def add_timer(self, timer):
         """Keep an eye on when this timer is stopped is done"""
         self.timers.add(timer)
-        timer.stopped.connect(self.__remove_timer)
 
-    def __remove_timer(self, timer):
-        """Timer is done so remove and check if all objects are done"""
+    def remove_timer(self, timer):
+        """Timer has stopped so remove and check if all objects are done"""
         self.timers.remove(timer)
         self.__queue_check_for_exit()
 
     def __queue_check_for_exit(self):
         """Check whether to exit, but return to event loop first to allow queued deletions to take place"""
-        QTimer.singleShot(10, self.__check_for_exit)
+        QTimer.singleShot(100, self.__check_for_exit)
 
     def __check_for_exit(self):
         """If no timers or frames exist, it is time to stop"""

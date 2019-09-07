@@ -22,12 +22,44 @@ from typing import Callable
 
 from _app import TheApp
 
+from PySide2.QtCore import QTimer
+
+
+class StartStopTimer(QTimer):
+    """QTimer that registers/unregisters itself with TheApp singleton on start/stop"""
+
+    def start(self, *args):
+        super().start()
+        TheApp.add_timer(self)
+
+    def stop(self):
+        super().stop()
+        TheApp.remove_timer(self)
+
 
 class Timer:
-    """Container for a QTimer that fires at a given rate and calls a handler"""
+    """Container for a StartStopTimer that fires at a given rate and calls a handler"""
 
     def __init__(self, interval, timer_handler):
         # type: (int, Callable[[], None]) -> None
-        """Create a new timer with the given interval and timeout handler"""
-        raise NotImplementedError()
-        # TODO: implement
+        """Creates a timer.
+
+        Once started, it will repeatedly call the given event handler at the specified interval, which is given in
+        milliseconds. The handler should be defined with no arguments.
+        """
+        self.__timer = StartStopTimer()
+        self.__timer.setInterval(interval)
+        self.__timer.timeout.connect(timer_handler)
+
+    def start(self):
+        """Starts or restarts the timer"""
+        self.__timer.start()
+
+    def stop(self):
+        """Stops the timer.  It can be restarted"""
+        self.__timer.stop()
+
+    def is_running(self):
+        # type: () -> bool
+        """Returns whether the timer is running, i.e., it has been started, but not stopped"""
+        return self.__timer.isActive()
