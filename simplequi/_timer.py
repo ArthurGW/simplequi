@@ -20,12 +20,14 @@
 # -----------------------------------------------------------------------------
 from typing import Callable
 
+from _app import TheApp
+
+
 class Timer:
     """Container for a QTimer that fires at a given rate and calls a handler"""
 
     def __init__(self, interval, timer_handler):
-        """Create a new timer with the given interval and timeout handler"""
         # type: (int, Callable[[], None]) -> None
+        """Create a new timer with the given interval and timeout handler"""
         raise NotImplementedError()
         # TODO: implement
-

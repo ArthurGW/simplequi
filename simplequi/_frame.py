@@ -19,7 +19,7 @@
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
-from PySide2.QtCore import Qt, QTimer
+from PySide2.QtCore import Qt, QTimer, Signal
 from PySide2.QtWidgets import QWidget, QSizePolicy, QHBoxLayout
 
 from _canvas import DrawingAreaContainer
@@ -29,6 +29,16 @@ from _fonts import get_text_width_for_font_spec, FontSpec
 from _widgets import ControlPanelWidget
 
 
+class MainWidget(QWidget):
+    """QWidget that notifies on close"""
+    closed = Signal()
+
+    def closeEvent(self, event):
+        """Tell Frame container about this event"""
+        self.closed.emit()
+        super().closeEvent(event)
+
+
 class Frame:
     """Singleton Frame containing all other widgets.
 
@@ -36,6 +46,7 @@ class Frame:
     function that should be used to get Frames, and that simply resets the fixed instance of this class.
     """
     __called = False  # Whether user has created a frame
+    __first_init = True
     __main_widget = None
 
     def __init__(self, title, canvas_width, canvas_height, control_width=None):
@@ -44,18 +55,25 @@ class Frame:
         self.__reset(title, canvas_width, canvas_height, control_width)
 
     def __init_main_widget(self):
-        self.__main_widget = QWidget()
-        # self.__main_widget.setAttribute(Qt.WA_DeleteOnClose)
-        # self.__main_widget.setAttribute(Qt.WA_QuitOnClose, False)
-        # self.__main_widget.setWindowModality(Qt.WindowModal)
+        """Create the main widget"""
+        first_init = self.__main_widget is None
+        if not first_init:
+            try:
+                self.__main_widget.close()
+            except RuntimeError:
+                # Already deleted
+                pass
+        self.__main_widget = MainWidget()
+        self.__main_widget.closed.connect(self.__on_main_widget_closed)
 
     # Internal
+    def __on_main_widget_closed(self):
+        """Remove reference to allow deletion"""
+        self.__main_widget = None
+
     def __reset(self, title, canvas_width, canvas_height, control_width=None):
         # type: (str, int, int, Optional[int]) -> None
         """Destroys all widgets associated with this frame, stops handlers running, sets params to new values"""
-        first_init = self.__main_widget is None
-        if not first_init:
-            self.__main_widget.deleteLater()
         self.__init_main_widget()
 
         # Basic window layout
@@ -85,11 +103,12 @@ class Frame:
         self.__main_widget.setFocusPolicy(Qt.StrongFocus)
         self.__drawing_area.canvas.setFocus()
 
-        if not first_init:
+        if not self.__first_init:
             # User has initialised a frame
             self.__main_widget.show()
             self.__called = True
         else:
+            self.__first_init = False
             # Ensure app closes if no frames are created, won't run until the end of the user's script
             QTimer.singleShot(0, self.__check_no_frames_created)
 
@@ -97,7 +116,6 @@ class Frame:
         """If no user-created frame exists, make sure this closes to prevent it keeping the app running"""
         if not self.__called:
             self.__main_widget.close()
-            self.__main_widget.deleteLater()
 
     def set_canvas_background(self, colour):
         # type: (str) -> None
