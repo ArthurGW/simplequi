@@ -19,10 +19,14 @@
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
-import unittest
 import asyncio
+import queue
+import time
 
-from PySide2.QtCore import QTimer
+import unittest
+
+from PySide2.QtCore import QTimer, QThread, QObject, QWaitCondition, QMutex
+from PySide2.QtWidgets import QApplication
 
 import simplequi
 
@@ -31,31 +35,48 @@ async def waiter():
     await asyncio.sleep(1)
 
 
-class AsyncTestCase(unittest.TestCase):
-    @unittest.skip("Can't make this work yet")
-    def runTest(self):
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(self.create_timer_test())
+class Watcher(QObject):
+    def __init__(self, watchee):
+        super().__init__()
+        self.watchee = watchee
+        self.t = self.startTimer(100)
 
-    async def create_timer_test(self):
-        calls = 0
+    def timerEvent(self, event):
+        if self.watchee.calls == 10:
+            self.killTimer(self.t)
+
+
+class TestTimer(unittest.TestCase):
+    @classmethod
+    def tearDownClass(cls):
+        QApplication.instance().lastWindowClosed.emit()
+
+    def test_create_timer(self):
+        self.calls = 0
+        # self.thread = QThread()
+        # self.watcher = Watcher(self)
+        # self.watcher.moveToThread(self.thread)
+        # self.calls = queue.Queue(10)
+        # t = timer._Timer__timer
+        # t.moveToThread(self.thread)
+        # self.thread.start()
+        # self.thread.wait()
 
         def callback():
-            nonlocal timer, calls
-            calls += 1
-            print(calls)
-            if calls == 10:
-                timer.stop()
+            nonlocal self
+            self.calls += 1
+            if self.calls == 10:
+                self.timer.stop()
+                QApplication.instance().exit(0)
 
-        timer = simplequi.create_timer(10, callback)
-        timer.start()
-        self.assertTrue(timer.is_running())
-
-        await waiter()
-
-        self.assertFalse(timer.is_running())
-        self.assertEqual(calls, 10)
+        self.timer = simplequi.create_timer(10, callback)
+        self.timer.start()
+        self.assertTrue(self.timer.is_running())
+        # Enter the event loop to wait for the timer
+        QApplication.instance().exec_()
+        self.assertFalse(self.timer.is_running())
+        self.assertEqual(self.calls, 10)
 
 
 if __name__ == '__main__':
-    QTimer.singleShot(0, unittest.main)
+    unittest.main()
