@@ -22,24 +22,31 @@
 import unittest
 
 from PySide2.QtCore import Qt
+from PySide2.QtWidgets import QApplication
 
 import simplequi
 from simplequi._keys import REVERSE_KEY_MAP
 
 
-class MyTestCase(unittest.TestCase):
+class TestAPI(unittest.TestCase):
     """Basic API sanity checks"""
 
     NOT_IMP_API = [
-        ('create_timer', (500, lambda: print(5))),
         ('load_image', ('http://iana.org/_img/2015.1/iana-logo-homepage.svg',)),
         ('load_sound', ('http://iana.org/_img/2015.1/iana-logo-homepage.svg',)),
     ]
+
+    @staticmethod
+    def tearDownClass():
+        QApplication.instance().deleteLater()
 
     def test_api_not_currently_implemented(self):
         for func, args in self.NOT_IMP_API:
             func = getattr(simplequi, func)
             self.assertRaises(NotImplementedError, func, *args)
+
+    def test_create_timer(self):
+        self.fail('not implemented')
 
     def test_key_map(self):
         """Test all keys in map and reverse mapped to same value"""
@@ -65,10 +72,10 @@ class MyTestCase(unittest.TestCase):
             self.assertEqual(REVERSE_KEY_MAP[key], '<{}>'.format(key))
             self.assertIn(key, REVERSE_KEY_MAP)
 
-
     def test_create_frame(self):
         self.assertIs(simplequi.create_frame('Old Title', 200, 120), simplequi.create_frame('Title', 100, 100))
-        # TODO: more tests here
+        f = simplequi.create_frame('AGAIN', 1, 1, 1)
+        f._Frame__main_widget.close()
 
 
 if __name__ == '__main__':

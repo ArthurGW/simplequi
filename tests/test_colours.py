@@ -22,12 +22,16 @@
 import unittest
 
 from simplequi._colours import get_colour, COLOUR_MAP, DEFAULT_COLOURS
+from PySide2.QtWidgets import QApplication
 
 
 class TestColours(unittest.TestCase):
     """Test cases to exercise the _colours module
 
-    Exercises internal functions but only uses external get_colour api"""
+    Exercises internal functions but mostly only uses external get_colour api"""
+    @staticmethod
+    def tearDownClass():
+        QApplication.instance().deleteLater()
 
     def assertTupleAlmostEqual(self, t1, t2, msg='', dp=3):
         """Fuzzy comparer for tuples with floating point entries"""
