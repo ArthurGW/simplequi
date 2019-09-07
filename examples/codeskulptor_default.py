@@ -13,8 +13,6 @@ import simplequi as simplegui
 
 import math
 
-from _canvas import Canvas
-
 message = "Welcome!"
 
 faces = [

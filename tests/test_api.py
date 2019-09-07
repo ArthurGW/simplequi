@@ -36,17 +36,14 @@ class TestAPI(unittest.TestCase):
         ('load_sound', ('http://iana.org/_img/2015.1/iana-logo-homepage.svg',)),
     ]
 
-    @staticmethod
-    def tearDownClass():
-        QApplication.instance().deleteLater()
+    @classmethod
+    def tearDownClass(cls):
+        QApplication.instance().lastWindowClosed.emit()
 
     def test_api_not_currently_implemented(self):
         for func, args in self.NOT_IMP_API:
             func = getattr(simplequi, func)
             self.assertRaises(NotImplementedError, func, *args)
-
-    def test_create_timer(self):
-        self.fail('not implemented')
 
     def test_key_map(self):
         """Test all keys in map and reverse mapped to same value"""
