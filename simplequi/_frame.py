@@ -18,12 +18,10 @@
 # You should have received a copy of the GNU General Public License
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
-import sys
 
-from PySide2.QtCore import Qt
+from PySide2.QtCore import Qt, QTimer
 from PySide2.QtWidgets import QWidget, QSizePolicy, QHBoxLayout
 
-from _app import TheApp
 from _canvas import DrawingAreaContainer
 from _colours import get_colour
 from _constants import DEFAULT_FRAME_MARGIN
@@ -37,7 +35,7 @@ class Frame:
     Note the singleton-ness in not strictly enforced here, but the module function 'reset_frame' is the only external
     function that should be used to get Frames, and that simply resets the fixed instance of this class.
     """
-
+    __called = False  # Whether user has created a frame
     __main_widget = None
 
     def __init__(self, title, canvas_width, canvas_height, control_width=None):
@@ -88,7 +86,18 @@ class Frame:
         self.__drawing_area.canvas.setFocus()
 
         if not first_init:
+            # User has initialised a frame
             self.__main_widget.show()
+            self.__called = True
+        else:
+            # Ensure app closes if no frames are created, won't run until the end of the user's script
+            QTimer.singleShot(0, self.__check_no_frames_created)
+
+    def __check_no_frames_created(self):
+        """If no user-created frame exists, make sure this closes to prevent it keeping the app running"""
+        if not self.__called:
+            self.__main_widget.close()
+            self.__main_widget.deleteLater()
 
     def set_canvas_background(self, colour):
         # type: (str) -> None
@@ -99,12 +108,8 @@ class Frame:
         """Commence event handling on the frame (actually on the canvas that handles the events)"""
         self.__drawing_area.canvas.start()
 
-        TODO: change this behaviour somehow...
-        """
-        if not TheApp.is_running:
-            sys.exit(TheApp.exec_())
-
-    def get_canvas_textwidth(self, text, size, face):
+    @staticmethod
+    def get_canvas_textwidth(text, size, face):
         # type: (str, int, str) -> int
         """Given a text string, a font size, and a font face, this returns the width of the text in pixels.
 

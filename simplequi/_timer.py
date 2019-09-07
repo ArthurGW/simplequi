@@ -20,9 +20,6 @@
 # -----------------------------------------------------------------------------
 from typing import Callable
 
-from _app import TheApp
-
-
 class Timer:
     """Container for a QTimer that fires at a given rate and calls a handler"""
 

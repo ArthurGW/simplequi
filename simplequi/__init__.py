@@ -19,8 +19,16 @@
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
+# Initialise an app and get _api for its __all__ list only - these two will not be exported
+import _app
 import _api
+
+# The actual exported imports
 from _api import *
 
 __all__ = _api.__all__
 __version__ = '0.4.1'
+
+# Remove private stuff
+del _api
+del _app

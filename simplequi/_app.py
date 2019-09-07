@@ -25,18 +25,19 @@ from PySide2.QtWidgets import QApplication
 
 
 class _AppWithRunningFlag(QApplication):
-    """QApplication with property to say whether it has already been exec_ed"""
+    """Self-starting QApplication with property to say whether it has already been exec_ed"""
 
     def __init__(self):
         super().__init__([])
         self.__is_running = False
 
         # Always run the app, once the setup script is done
+        # This will enter the event loop, which will exit once any frames and timers created are done
         atexit.register(self.exec_)
 
     def exec_(self):
-        super().exec_()
         self.__is_running = True
+        super().exec_()
 
     @property
     def is_running(self):
@@ -44,4 +45,4 @@ class _AppWithRunningFlag(QApplication):
 
 
 TheApp = _AppWithRunningFlag()
-del _AppWithRunningFlag
+del _AppWithRunningFlag  # Prevent non-singleton
