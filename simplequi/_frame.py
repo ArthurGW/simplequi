@@ -22,6 +22,7 @@
 from PySide2.QtCore import Qt, QTimer, Signal
 from PySide2.QtWidgets import QWidget, QSizePolicy, QHBoxLayout
 
+from simplequi._app import TheApp
 from ._canvas import DrawingAreaContainer
 from ._colours import get_colour
 from ._constants import DEFAULT_FRAME_MARGIN
@@ -125,6 +126,7 @@ class Frame:
     def start(self):
         """Commence event handling on the frame (actually on the canvas that handles the events)"""
         self.__drawing_area.canvas.start()
+        TheApp.exec_()
 
     @staticmethod
     def get_canvas_textwidth(text, size, face):

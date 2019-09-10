@@ -34,10 +34,11 @@ from PySide2.QtGui import QPolygon
 from PySide2.QtWidgets import QWidget, QHBoxLayout
 from PySide2.QtGui import QPainter, QColor, QPaintEvent, QBrush, QPen, QPalette, QPixmap
 
+from simplequi._constants import Size
 from ._colours import get_colour
 from ._constants import NO_MARGINS, Point
 from ._fonts import get_font, FontSpec
-from ._image import Image
+from ._image import Image, get_pixmap
 
 ObjectHolder = namedtuple('ObjectHolder', ['obj_type', 'args'])
 
@@ -151,11 +152,17 @@ def render_text(painter, text, point, font_size, font_colour, font_face='serif')
     painter.drawText(*point, text)
 
 
-def render_image(painter, image, source_centre, source_window, canvas_center, canvas_size, rotation=None):
-    # type: (QPainter, Image, Point, Size, Point, Size, Optional[int]) -> None
+def render_image(painter, image, source_centre, source_window, canvas_center, canvas_size, rotation=0.0):
+    # type: (QPainter, Image, Point, Size, Point, Size, float) -> None
     """Render image or portion of it on canvas with optional rotation and scaling"""
-    raise NotImplementedError
-    # TODO: implement
+    pixmap = get_pixmap(image, source_centre, source_window, canvas_size, rotation)
+    if pixmap is None:
+        return
+
+    x, y = canvas_center
+    x -= canvas_size[0] / 2.
+    y -= canvas_size[1] / 2.
+    painter.drawPixmap(x, y, pixmap)
 
 
 class ObjectTypes(Enum):
@@ -494,8 +501,8 @@ class Canvas:
         coordinates."""
         self.__drawing_area.add_object(ObjectHolder(ObjectTypes.Point, (point, color)))
 
-    def draw_image(self, image, center_source, width_height_source, center_dest, width_height_dest, rotation=None):
-        # type: (Image, Point, Size, Point, Size, Optional[float]) -> None
+    def draw_image(self, image, center_source, width_height_source, center_dest, width_height_dest, rotation=0.0):
+        # type: (Image, Point, Size, Point, Size, float) -> None
         """Draw an image that was previously loaded by simplequi.load_image.
 
         center_source is a pair of coordinates giving the position of the center of the image, while center_dest is a

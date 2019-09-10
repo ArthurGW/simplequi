@@ -69,7 +69,7 @@ def load_image(url):
     The image can be in any format supported by PySide2.
     No error is raised if the file isn't found or is of an unsupported format.
     """
-    return Image.load_image_from_url(url)
+    return Image(url)
 
 
 def load_sound(url):
@@ -80,4 +80,4 @@ def load_sound(url):
     Supports whatever audio formats that PySide2 supports.
     No error is raised if the file isn't found or is of an unsupported format.
     """
-    return Sound.load_sound_from_url(url)
+    return Sound(url)
