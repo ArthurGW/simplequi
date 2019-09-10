@@ -47,6 +47,7 @@ class TestAPI(unittest.TestCase):
     def test_image(self):
         self.fail('Not implemented')
 
+    @unittest.skip('Sounds not done yet')
     def test_sound(self):
         self.fail('Not implemented')
 

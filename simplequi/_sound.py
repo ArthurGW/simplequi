@@ -21,7 +21,7 @@
 
 
 class Sound:
-    def __init__(self):
+    def __init__(self, url):
         raise NotImplementedError()
         # TODO: implement
 
