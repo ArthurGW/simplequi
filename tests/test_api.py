@@ -32,7 +32,6 @@ class TestAPI(unittest.TestCase):
     """Basic API sanity checks"""
 
     NOT_IMP_API = [
-        ('load_image', ('http://iana.org/_img/2015.1/iana-logo-homepage.svg',)),
         ('load_sound', ('http://iana.org/_img/2015.1/iana-logo-homepage.svg',)),
     ]
 
@@ -44,6 +43,12 @@ class TestAPI(unittest.TestCase):
         for func, args in self.NOT_IMP_API:
             func = getattr(simplequi, func)
             self.assertRaises(NotImplementedError, func, *args)
+
+    def test_image(self):
+        self.fail('Not implemented')
+
+    def test_sound(self):
+        self.fail('Not implemented')
 
     def test_key_map(self):
         """Test all keys in map and reverse mapped to same value"""
