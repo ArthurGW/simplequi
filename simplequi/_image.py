@@ -49,18 +49,19 @@ class Image:
         # type: (QByteArray) -> None
         """Create the QImage from the data"""
         image = QImage()
-        image.loadFromData(data)
-        width = image.width()
-        height = image.height()
-        size = (width, height)
-        centre_x = width / 2
-        centre_y = height / 2
-        centre = (centre_x, centre_y)
-        _IMAGE_CACHE[self] = image
-        _PIXMAP_CACHE[self] = {}
+        loaded = image.loadFromData(data)
+        if loaded:
+            width = image.width()
+            height = image.height()
+            size = (width, height)
+            centre_x = width / 2
+            centre_y = height / 2
+            centre = (centre_x, centre_y)
+            _IMAGE_CACHE[self] = image
+            _PIXMAP_CACHE[self] = {}
 
-        # Cache the full-size pixmap
-        get_pixmap(self, centre, size, size)
+            # Cache the full-size pixmap
+            get_pixmap(self, centre, size, size)
 
     def get_width(self):
         """Returns the width of the image in pixels. While the image is still loading, it returns zero."""
