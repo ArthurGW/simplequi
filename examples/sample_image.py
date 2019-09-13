@@ -21,11 +21,12 @@
 
 import simplequi as simplegui
 
+
 def draw(canvas):
     canvas.draw_image(im, (500, 300), (1000, 600), (500, 300), (1000, 600))
 
 
-im = simplegui.load_image(r'sample_image.png')
+im = simplegui.load_image('resources/sample_image.png')
 frame = simplegui.create_frame('Sample', 1000, 600)
 frame.set_draw_handler(draw)
 frame.start()

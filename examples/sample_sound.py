@@ -20,11 +20,10 @@
 # -----------------------------------------------------------------------------
 
 import simplequi as simplegui
-import time
 from math import log2
 
-sound = simplegui.load_sound('253756_tape-on.wav')
-drums = simplegui.load_sound('425556__planetronik__rock-808-beat.mp3')
+sound = simplegui.load_sound('resources/253756_tape-on.wav')
+drums = simplegui.load_sound('resources/425556__planetronik__rock-808-beat.mp3')
 volume = 100
 count = 100
 total_log = log2(volume)
