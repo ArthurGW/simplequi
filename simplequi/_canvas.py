@@ -28,7 +28,7 @@ from typing import Iterable
 from typing import Optional
 
 from PySide2.QtCore import Qt, QPoint, Signal
-from PySide2.QtGui import QKeyEvent
+from PySide2.QtGui import QKeyEvent, QTransform
 from PySide2.QtGui import QMouseEvent
 from PySide2.QtGui import QPolygon
 from PySide2.QtWidgets import QWidget, QHBoxLayout
@@ -155,14 +155,23 @@ def render_text(painter, text, point, font_size, font_colour, font_face='serif')
 def render_image(painter, image, source_centre, source_window, canvas_center, canvas_size, rotation=0.0):
     # type: (QPainter, Image, Point, Size, Point, Size, float) -> None
     """Render image or portion of it on canvas with optional rotation and scaling"""
-    pixmap = get_pixmap(image, source_centre, source_window, canvas_size, rotation)
+    pixmap = get_pixmap(image, source_centre, source_window, canvas_size)
     if pixmap is None:
         return
 
+    if rotation != 0.0:
+        transform = QTransform()
+        transform = transform.translate(*canvas_center)
+        transform = transform.rotateRadians(rotation)
+        painter.save()
+        painter.setTransform(transform)
+        canvas_center = 0, 0
     x, y = canvas_center
     x -= canvas_size[0] / 2.
     y -= canvas_size[1] / 2.
     painter.drawPixmap(x, y, pixmap)
+    if rotation != 0.0:
+        painter.restore()
 
 
 class ObjectTypes(Enum):

@@ -78,12 +78,17 @@ class Image:
         return _IMAGE_CACHE[self].height()
 
 
-def get_pixmap(image, image_coords, image_rect, target_rect, rotation=0.0):
+def _get_pixmap_key(image_coords, image_rect, target_rect):
+    """Convert params to hashable string"""
+    return '{},{},{},{},{},{}'.format(*image_coords, *image_rect, *target_rect)
+
+
+def get_pixmap(image, image_coords, image_rect, target_rect):
     # type: (Image, Point, Size, Size, float) -> Optional[QPixmap]
     """Returns a QPixmap section of the QImage associated with the image object
 
-    The section will be taken as a rectangle centred at the image coords given with the given dimensions, optionally
-    rotated, scaled to the target rectangle size and shape.
+    The section will be taken as a rectangle centred at the image coords given with the given dimensions, scaled to the
+    target rectangle size and shape.
     """
 
     # Get the actual QImage
@@ -92,7 +97,8 @@ def get_pixmap(image, image_coords, image_rect, target_rect, rotation=0.0):
         # Still loading or invalid result
         return None
 
-    pixmap = _PIXMAP_CACHE[image].get((image_coords, image_rect, target_rect, rotation))
+    key = _get_pixmap_key(image_coords, image_rect, target_rect)
+    pixmap = _PIXMAP_CACHE[image].get(key)
     if pixmap is not None:
         return pixmap
 
@@ -104,11 +110,7 @@ def get_pixmap(image, image_coords, image_rect, target_rect, rotation=0.0):
 
     if image_rect != target_rect:
         section = section.scaled(*target_rect)
-    if rotation != 0.0:
-        transform = QTransform()
-        transform = transform.rotateRadians(rotation)
-        section = section.transformed(transform)
 
     pixmap = QPixmap.fromImage(section)
-    _PIXMAP_CACHE[image][(image_coords, image_rect, target_rect, rotation)] = pixmap
+    _PIXMAP_CACHE[image][key] = pixmap
     return pixmap
