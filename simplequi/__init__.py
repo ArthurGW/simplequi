@@ -27,7 +27,7 @@ from . import _api
 from ._api import *
 
 __all__ = _api.__all__
-__version__ = '0.5.1'
+__version__ = '0.6.0'
 
 # Remove private stuff
 del _api

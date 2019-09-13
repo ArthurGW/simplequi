@@ -30,7 +30,7 @@ with open(readme_path, 'r') as readme_file:
 
 setup(
     name='simplequi',
-    version='0.5.1',
+    version='0.6.0',
     description='Run codeskulptor.org programs on the desktop using Qt/PySide2',
     long_description=README,
     long_description_content_type='text/markdown',
@@ -48,7 +48,7 @@ setup(
     install_requires=['PySide2>=5.12.0'],  # Currently only support PySide2
     extras_require={
         'dev': [
-            'bump2version==0.5.11',
+            'bump2version==0.6.01',
             'PySide2>=5.12.0'
             'setuptools==41.2.0',
             'wheel==0.33.6',
