@@ -18,6 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
+"""Draw a portion of an image in a frame"""
 
 import simplequi as simplegui
 
