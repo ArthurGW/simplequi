@@ -39,7 +39,7 @@ class _AppWithRunningFlag(QApplication):
         # Always run the app, once the setup script is done
         # This will enter the event loop, which will exit once any frames and timers created are done
         # TODO: reinstate
-        # atexit.register(self.exec_)
+        atexit.register(self.exec_)
 
     def exec_(self):
         if not self.is_running:

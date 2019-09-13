@@ -19,19 +19,57 @@
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
+from PySide2.QtMultimedia import QAudio, QMediaPlayer, QMediaContent
+
+from ._url import request
+
 
 class Sound:
     def __init__(self, url):
-        raise NotImplementedError()
-        # TODO: implement
-
-    @classmethod
-    def load_sound_from_url(cls, url):
-        # type: (str) -> Sound
+        # type: (str) -> None
         """
-        Loads an image from the specified URL.
+        Loads a sound from the specified URL.
 
-        The image can be in any format supported by PySide2.
-        An error is raised if the file can't be loaded for any reason.
+        Supports whatever audio formats that PySide2 supports (depending on locally-installed codecs).
+        No error is raised if the file isn't found or is of an unsupported format.
         """
-        return Sound()
+        req = request(url)
+        content = QMediaContent(req)
+        self.__player = QMediaPlayer(flags=QMediaPlayer.LowLatency)
+        self.__player.setAudioRole(QAudio.GameRole)
+        self.__player.setMedia(content)
+        self.__player.mediaStatusChanged.connect(self.__on_status_changed)
+        self.__player.error.connect(self.__on_status_changed)
+        self.__sound_loaded = False
+
+    def __on_status_changed(self, _):
+        # type: (QMediaPlayer.MediaStatus) -> None
+        """Check if the sound is loaded"""
+        error = self.__player.error()
+        if error != QMediaPlayer.NoError:
+            self.__sound_loaded = False
+            return
+
+        status = self.__player.mediaStatus()
+        if QMediaPlayer.LoadedMedia <= status < QMediaPlayer.InvalidMedia:
+            self.__sound_loaded = True
+
+    def play(self):
+        """Starts playing a sound, or restarts playing it at the point it was paused"""
+        if self.__sound_loaded:
+            self.__player.play()
+
+    def pause(self):
+        """Stops the playing of the sound. Playing can be restarted at the stopped point with Sound.play()"""
+        if self.__sound_loaded:
+            self.__player.pause()
+
+    def rewind(self):
+        """Stops playing the sound, and makes it so the next play() will start playing the sound at the beginning"""
+        self.__player.stop()
+
+    def set_volume(self, volume):
+        # type: (float) -> None
+        """Changes the volume for the sound to be the given level on a 0 (silent)–1.0 (maximum) scale. Default is 1."""
+        assert 0.0 <= volume <= 1.0, "volume must be given in range 0-1 inclusive"
+        self.__player.setVolume(int(100 * volume))

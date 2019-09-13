@@ -126,7 +126,7 @@ class Frame:
     def start(self):
         """Commence event handling on the frame (actually on the canvas that handles the events)"""
         self.__drawing_area.canvas.start()
-        TheApp.exec_()
+        # TheApp.exec_()
 
     @staticmethod
     def get_canvas_textwidth(text, size, face):

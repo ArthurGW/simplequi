@@ -25,7 +25,7 @@ from PySide2.QtCore import QByteArray
 from PySide2.QtGui import QImage, QPixmap, QTransform
 
 from ._constants import Point, Size
-from ._url import request
+from ._url import request_with_callback
 
 _IMAGE_CACHE = {}  # Stores the actual QImage for each Image object
 _PIXMAP_CACHE = {}  # Stores pixmaps generated from each QImage for faster rendering
@@ -42,7 +42,7 @@ class Image:
         The image can be in any format supported by PySide2.
         An error is raised if the file can't be loaded for any reason.
         """
-        request(url, self.__load_image)
+        request_with_callback(url, self.__load_image)
         _IMAGE_CACHE[self] = None
 
     def __load_image(self, data):
