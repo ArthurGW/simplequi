@@ -21,6 +21,7 @@
 
 from PySide2.QtMultimedia import QAudio, QMediaPlayer, QMediaContent
 
+from ._app import TheApp
 from ._url import request
 
 
@@ -40,33 +41,44 @@ class Sound:
         self.__player.setMedia(content)
         self.__player.mediaStatusChanged.connect(self.__on_status_changed)
         self.__player.error.connect(self.__on_status_changed)
+        TheApp.add_tracked(self)
         self.__sound_loaded = False
+        self.__play_requested = False
 
     def __on_status_changed(self, _):
         # type: (QMediaPlayer.MediaStatus) -> None
         """Check if the sound is loaded"""
         error = self.__player.error()
-        if error != QMediaPlayer.NoError:
-            self.__sound_loaded = False
-            return
-
         status = self.__player.mediaStatus()
-        if QMediaPlayer.LoadedMedia <= status < QMediaPlayer.InvalidMedia:
+        if error == QMediaPlayer.NoError and QMediaPlayer.LoadedMedia <= status < QMediaPlayer.InvalidMedia:
             self.__sound_loaded = True
+            if self.__play_requested and status != QMediaPlayer.EndOfMedia:
+                return self.play()
+        else:
+            self.__sound_loaded = False
+        self.__play_requested = False
+        TheApp.remove_tracked(self)
 
     def play(self):
         """Starts playing a sound, or restarts playing it at the point it was paused"""
         if self.__sound_loaded:
             self.__player.play()
+            TheApp.add_tracked(self)
+        self.__play_requested = True
 
     def pause(self):
         """Stops the playing of the sound. Playing can be restarted at the stopped point with Sound.play()"""
         if self.__sound_loaded:
             self.__player.pause()
+            TheApp.remove_tracked(self)
+        self.__play_requested = False
 
     def rewind(self):
         """Stops playing the sound, and makes it so the next play() will start playing the sound at the beginning"""
-        self.__player.stop()
+        if self.__sound_loaded:
+            self.__player.stop()
+            TheApp.remove_tracked(self)
+        self.__play_requested = False
 
     def set_volume(self, volume):
         # type: (float) -> None

@@ -28,7 +28,7 @@ from PySide2.QtWidgets import QApplication
 class _AppWithRunningFlag(QApplication):
     """Self-starting QApplication with property to say whether it has already been exec_ed"""
 
-    timers = set([])  # Keep track of timers to know when to quit
+    tracked = set([])  # Keep track of timers and sounds to know when to quit
 
     def __init__(self):
         super().__init__([])
@@ -54,13 +54,14 @@ class _AppWithRunningFlag(QApplication):
     def is_running(self):
         return self.__is_running
 
-    def add_timer(self, timer):
-        """Keep an eye on when this timer is stopped is done"""
-        self.timers.add(timer)
+    def add_tracked(self, obj):
+        """Keep an eye on when this object is stopped"""
+        self.tracked.add(obj)
 
-    def remove_timer(self, timer):
-        """Timer has stopped so remove and check if all objects are done"""
-        self.timers.remove(timer)
+    def remove_tracked(self, obj):
+        """Timer/sound has stopped so remove and check if all objects are done"""
+        if obj in self.tracked:
+            self.tracked.remove(obj)
         self.__queue_check_for_exit()
 
     def __queue_check_for_exit(self, wait=100):
@@ -69,7 +70,7 @@ class _AppWithRunningFlag(QApplication):
 
     def __check_for_exit(self):
         """If no timers or frames exist, it is time to stop"""
-        if not self.timers and not self.topLevelWidgets():
+        if not self.tracked and not self.topLevelWidgets():
             # Done
             self.exit(0)
 
