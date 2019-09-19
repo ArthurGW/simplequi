@@ -18,16 +18,17 @@
 # You should have received a copy of the GNU General Public License
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
+from typing import Callable, Optional, Tuple
 
 from PySide2.QtCore import Qt, QTimer, Signal
 from PySide2.QtWidgets import QWidget, QSizePolicy, QHBoxLayout
 
-from simplequi._app import TheApp
-from ._canvas import DrawingAreaContainer
+from ._app import TheApp
+from ._canvas import DrawingAreaContainer, Canvas
 from ._colours import get_colour
 from ._constants import DEFAULT_FRAME_MARGIN
 from ._fonts import get_text_width_for_font_spec, FontSpec
-from ._widgets import ControlPanelWidget
+from ._widgets import Control, ControlPanelWidget
 
 
 class MainWidget(QWidget):

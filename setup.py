@@ -40,7 +40,7 @@ setup(
     license='GPLv3',
     classifiers=[
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
-        'Programming Language :: Python :: 2',
+        # 'Programming Language :: Python :: 2', Not currently supported
         'Programming Language :: Python :: 3',
     ],
     packages=['simplequi'],
@@ -52,6 +52,8 @@ setup(
             'PySide2>=5.12.0'
             'setuptools==41.2.0',
             'wheel==0.33.6',
+            'sphinx',
+            'sphinx-rtd-theme',
         ],
     },
 )

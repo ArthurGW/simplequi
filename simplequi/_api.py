@@ -20,22 +20,31 @@
 # -----------------------------------------------------------------------------
 """The basic simplegui API - all package-level calls go through here.
 
-The returned objects from these functions all implement their own APIs defined in their respective modules."""
+The returned objects from these functions all implement their own APIs defined in their respective classes."""
 
-from typing import Callable
-from typing import Optional
+from typing import Callable, Optional
 
-from ._frame import reset_frame
+from ._canvas import Canvas
+from ._frame import reset_frame, Frame
 from ._image import Image
 from ._keys import KEY_MAP
 from ._sound import Sound
 from ._timer import Timer
+from ._widgets import Control
 
-__all__ = ['KEY_MAP',
-           'create_frame',
-           'create_timer',
-           'load_image',
-           'load_sound']
+__all__ = [
+    'KEY_MAP',
+    'create_frame',
+    'create_timer',
+    'load_image',
+    'load_sound',
+    'Frame',
+    'Canvas',
+    'Control',
+    'Image',
+    'Sound',
+    'Timer',
+   ]
 
 
 def create_frame(title, canvas_width, canvas_height, control_width=None):
@@ -68,6 +77,11 @@ def load_image(url):
 
     The image can be in any format supported by PySide2.
     No error is raised if the file isn't found or is of an unsupported format.
+
+    :param url: the URL of the image to load
+    :type url: str
+    :return: an Image object that can be passed to canvas.draw_image
+    :rtype: Image
     """
     return Image(url)
 
