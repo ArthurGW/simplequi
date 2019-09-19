@@ -32,7 +32,7 @@ running using PySide2/Qt.
    :maxdepth: 2
    :caption: Contents:
 
-   modules
+   simplequi
    installation
 
 
