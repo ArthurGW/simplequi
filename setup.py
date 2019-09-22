@@ -51,10 +51,9 @@ setup(
     # Install OpenSSL dlls so PySide2 can retrieve images/sounds from https urls
     # This is possibly illegal in some countries where encryption is not allowed
     # TODO: check licence and what else might need to be included with this, or remove and write docs instead
-    data_files=[
-        ('Lib/site-packages/PySide2', ['ssllib/libcrypto-1_1-x64.dll', 'ssllib/libssl-1_1-x64.dll']),
-    ],
-    # include_package_data=True,  # Might be relevant later
+    package_data={
+        'simplequi': ['ssllib/*', 'fonts/NK57 Monospace/*'],
+    },
     python_requires='>=3.5',
     install_requires=['PySide2>=5.12.0'],  # Currently only support PySide2
     extras_require={

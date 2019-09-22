@@ -23,14 +23,13 @@
 
 from collections import namedtuple
 from enum import Enum
-import os
 
 from PySide2.QtCore import QRect
 from PySide2.QtGui import QFont, QFontMetrics, QFontDatabase
+import pkg_resources
 
 # Change the default monospace font to one a bit less wide than Courier New
-file_path = __file__
-font_path = os.path.join(os.path.dirname(file_path), 'Fonts', 'NK57 Monospace', 'nk57-monospace-sc-rg.ttf')
+font_path = pkg_resources.resource_filename(__name__, 'resources/fonts/NK57 Monospace/nk57-monospace-sc-rg.ttf')
 monospace = QFontDatabase.addApplicationFont(font_path)
 
 

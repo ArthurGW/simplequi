@@ -30,5 +30,5 @@ __all__ = _api.__all__
 __version__ = '0.7.0'
 
 # Remove private stuff
-del _api
-del _app
+del _api, _app
+

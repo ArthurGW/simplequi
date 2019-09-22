@@ -29,6 +29,31 @@ from PySide2.QtNetwork import (
     # QSslSocket
 )
 
+import importlib.util
+import os
+import pkg_resources
+
+_SSL_DLLS = ['libcrypto-1_1-x64.dll', 'libssl-1_1-x64.dll']
+_CHECKED_SSL_DLLS = []
+
+
+def _ensure_openssl_location():
+    """Ensure OpenSSL DLLs are available in PySide2 directory"""
+    _SSL_DLLS = ['libcrypto-1_1-x64.dll', 'libssl-1_1-x64.dll']
+
+    path = importlib.util.find_spec('PySide2').origin
+    path = os.path.dirname(path)
+
+    for dll in _SSL_DLLS:
+        _CHECKED_SSL_DLLS.append(dll)
+        dll_target_path = os.path.join(path, dll)
+        if os.path.exists(dll_target_path):
+            continue
+
+        dll_data = pkg_resources.resource_stream(__name__, 'resources/ssllib/' + dll)
+        with open(dll_target_path, 'wb') as out:
+            out.write(dll_data.read())
+
 
 _MANAGER = QNetworkAccessManager()
 
@@ -37,6 +62,9 @@ def request(url):
     # type: (str) -> QNetworkRequest
     """Construct a network request for the specified url"""
     url = QUrl.fromLocalFile(url) if os.path.isfile(url) else QUrl(url)
+
+    if url.scheme() == 'https' and _SSL_DLLS != _CHECKED_SSL_DLLS:
+        _ensure_openssl_location()
     req = QNetworkRequest(url)
 
     # REMOVED BUT KEEP FOR REFERENCE FOR NOW
