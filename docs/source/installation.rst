@@ -21,3 +21,8 @@ Installation and Usage
 ======================
 
 TODO: write
+
+NOTES: do not install with setup.py install, uses eggs which fails to copy openssl to correct dir
+also do not use pip install -r requirements*.txt - editable mode doesn't work well
+- or manually move after install
+- or could setup script to do this but might need to be admin

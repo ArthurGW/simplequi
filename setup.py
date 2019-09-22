@@ -40,18 +40,22 @@ setup(
     license='GPLv3',
     classifiers=[
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
-        # 'Programming Language :: Python :: 2', Not currently supported
+        # 'Programming Language :: Python :: 2', Not currently supported, unlikely to change
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
     packages=['simplequi'],
 
     # Install OpenSSL dlls so PySide2 can retrieve images/sounds from https urls
-    # This is illegal in some countries where encryption is not allowed
+    # This is possibly illegal in some countries where encryption is not allowed
     # TODO: check licence and what else might need to be included with this, or remove and write docs instead
     data_files=[
         ('Lib/site-packages/PySide2', ['ssllib/libcrypto-1_1-x64.dll', 'ssllib/libssl-1_1-x64.dll']),
     ],
     # include_package_data=True,  # Might be relevant later
+    python_requires='>=3.5',
     install_requires=['PySide2>=5.12.0'],  # Currently only support PySide2
     extras_require={
         'dev': [

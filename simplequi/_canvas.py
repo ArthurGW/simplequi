@@ -20,7 +20,7 @@
 # -----------------------------------------------------------------------------
 
 from collections import namedtuple
-from enum import auto, Enum
+from enum import Enum
 from functools import wraps
 from math import pi
 from typing import Callable, Tuple
@@ -176,14 +176,14 @@ def render_image(painter, image, source_centre, source_window, canvas_center, ca
 
 
 class ObjectTypes(Enum):
-    Text = auto()
-    Line = auto()
-    Polyline = auto()
-    Polygon = auto()
-    Circle = auto()
-    Arc = auto()
-    Point = auto()
-    Image = auto()
+    Text = 0
+    Line = 1
+    Polyline = 2
+    Polygon = 3
+    Circle = 4
+    Arc = 5
+    Point = 6
+    Image = 7
 
 
 OBJECT_RENDERERS = {
