@@ -488,7 +488,7 @@ class Canvas:
         It is an error for the list of points to be empty. Each point is a 2-element tuple or list of screen
         coordinates. The line's width is given in pixels and must be positive.
         """
-        point_list = self.__ensure_int_coords(point_list)
+        point_list = self.__ensure_int_coords(*point_list)
         line_width = self.__ensure_int_values(line_width)
         self.__drawing_area.add_object(ObjectHolder(ObjectTypes.Polyline, (point_list, line_width, line_color)))
 
@@ -501,7 +501,7 @@ class Canvas:
         coordinates. The line's width is given in pixels, and must be positive. The fill color defaults to None. If the
         fill color is specified, then the interior of the polygon is colored.
         """
-        point_list = self.__ensure_int_coords(point_list)
+        point_list = self.__ensure_int_coords(*point_list)
         line_width = self.__ensure_int_values(line_width)
         self.__drawing_area.add_object(ObjectHolder(ObjectTypes.Polygon,
                                                     (point_list, line_width, line_color, fill_color)))
