@@ -34,6 +34,8 @@ class Sound:
         Supports whatever audio formats that PySide2 supports (depending on locally-installed codecs).
         No error is raised if the file isn't found or is of an unsupported format.
         """
+        self.__url = url  # Only used for debugging
+
         req = request(url)
         content = QMediaContent(req)
         self.__player = QMediaPlayer(flags=QMediaPlayer.LowLatency)

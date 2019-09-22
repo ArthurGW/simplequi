@@ -157,6 +157,7 @@ def render_image(painter, image, source_centre, source_window, canvas_center, ca
     """Render image or portion of it on canvas with optional rotation and scaling"""
     pixmap = get_pixmap(image, source_centre, source_window, canvas_size)
     if pixmap is None:
+        # Image not loaded yet, shouldn't get here but just in case...
         return
 
     if rotation != 0.0:
@@ -280,20 +281,27 @@ class DrawingArea(QWidget):
     @check_started
     def __draw(self):
         """Call draw handler and re-render widget if necessary"""
+        if self.__draw_handler is None:
+            return
+
         self.__new_objects = []
         self.__draw_handler(self.__canvas)
 
         if self.__new_objects != self.__objects:
             self.__objects = self.__new_objects
-            self.__reset_pixmap()
-            painter = QPainter(self.__pixmap)
-            painter.setRenderHint(
-                QPainter.RenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform))
-            painter.save()
-            for obj in self.__objects:
-                painter.restore()
-                OBJECT_RENDERERS[obj.obj_type](painter, *obj.args)
-            self.update()
+            self.__render()
+
+    def __render(self):
+        """Actually render the canvas"""
+        self.__reset_pixmap()
+        painter = QPainter(self.__pixmap)
+        painter.setRenderHint(
+            QPainter.RenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform))
+        painter.save()
+        for obj in self.__objects:
+            painter.restore()
+            OBJECT_RENDERERS[obj.obj_type](painter, *obj.args)
+        self.update()
 
     def add_object(self, primitive):
         """Add a primitive to the draw queue"""
@@ -305,23 +313,14 @@ class DrawingArea(QWidget):
         self.__palette.setColor(QPalette.Base, colour)
         self.setPalette(self.__palette)
         self.__background_colour = colour
-        self.__reset_pixmap()
-        self.update()
+        self.__render()
 
     @check_started
     def paintEvent(self, event):
         # type: (QPaintEvent) -> None
-        """Render all user-specified shapes on the canvas"""
+        """Draw cached pixmap on the canvas - __render takes care of creating it"""
         painter = QPainter(self)
         painter.drawPixmap(self.rect(), self.__pixmap)
-        # painter.setRenderHint(
-        #     QPainter.RenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform))
-        # painter.save()
-        # pixmap = QPixmap(300, 200)
-        # pixmap.fill()
-        # for obj in self.__objects:
-        #     self.__painter.restore()
-        #     OBJECT_RENDERERS[obj.obj_type](self.__painter, *obj.args)
 
     # Events
     def start(self):
@@ -443,6 +442,25 @@ class Canvas:
         """Initialise the wrapper"""
         self.__drawing_area = drawing_area
 
+    def __ensure_int_coords(self, *coords):
+        """Cast point/rect coords to int
+
+        To ensure Py2 compatibility with scripts that have problems with floor division -> true division on Py3"""
+        res = []
+        for coord in coords:
+            new_coord = (int(coord[0]), int(coord[1]))
+            res.append(new_coord)
+        return res[0] if len(res) == 1 else res
+
+    def __ensure_int_values(self, *values):
+        """Cast values to int
+
+        To ensure Py2 compatibility with scripts that have problems with floor division -> true division on Py3"""
+        res = []
+        for val in values:
+            res.append(int(val))
+        return res[0] if len(res) == 1 else res
+
     def draw_text(self, text, point, font_size, font_color, font_face='serif'):
         # type: (str, Point, int, str, str) -> None
         """Writes the given text string in the given font size, color, and font face.
@@ -450,6 +468,8 @@ class Canvas:
         The point is a 2-element tuple or list of screen coordinates representing the lower-left-hand corner of where to
         write the text.  The supported font faces are 'serif' (the default), 'sans-serif', and 'monospace'.
         """
+        point = self.__ensure_int_coords(point)
+        font_size = self.__ensure_int_values(font_size)
         self.__drawing_area.add_object(ObjectHolder(ObjectTypes.Text, (text, point, font_size, font_color, font_face)))
 
     def draw_line(self, point1, point2, line_width, line_color):
@@ -457,6 +477,8 @@ class Canvas:
         """Draws a line segment between the two points, each of which is a 2-element tuple or list of screen
         coordinates. The line's width is given in pixels and must be positive.
         """
+        point1, point2 = self.__ensure_int_coords(point1, point2)
+        line_width = self.__ensure_int_values(line_width)
         self.__drawing_area.add_object(ObjectHolder(ObjectTypes.Line, (point1, point2, line_width, line_color)))
 
     def draw_polyline(self, point_list, line_width, line_color):
@@ -466,6 +488,8 @@ class Canvas:
         It is an error for the list of points to be empty. Each point is a 2-element tuple or list of screen
         coordinates. The line's width is given in pixels and must be positive.
         """
+        point_list = self.__ensure_int_coords(point_list)
+        line_width = self.__ensure_int_values(line_width)
         self.__drawing_area.add_object(ObjectHolder(ObjectTypes.Polyline, (point_list, line_width, line_color)))
 
     def draw_polygon(self, point_list, line_width, line_color, fill_color=None):
@@ -477,6 +501,8 @@ class Canvas:
         coordinates. The line's width is given in pixels, and must be positive. The fill color defaults to None. If the
         fill color is specified, then the interior of the polygon is colored.
         """
+        point_list = self.__ensure_int_coords(point_list)
+        line_width = self.__ensure_int_values(line_width)
         self.__drawing_area.add_object(ObjectHolder(ObjectTypes.Polygon,
                                                     (point_list, line_width, line_color, fill_color)))
 
@@ -488,6 +514,8 @@ class Canvas:
         positive. The fill color defaults to None. If the fill color is specified, then the interior of the circle is
         colored.
         """
+        center_point = self.__ensure_int_coords(center_point)
+        radius, line_width = self.__ensure_int_values(radius, line_width)
         self.__drawing_area.add_object(ObjectHolder(ObjectTypes.Circle,
                                                     (center_point, radius, line_width, line_color, fill_color)))
 
@@ -500,6 +528,8 @@ class Canvas:
         position. The line's width is given in pixels and must be positive. The fill color defaults to None. If the fill
         color is specified, then the interior of the circle is colored.
         """
+        center_point = self.__ensure_int_coords(center_point)
+        radius, line_width = self.__ensure_int_values(radius, line_width)
         self.__drawing_area.add_object(ObjectHolder(ObjectTypes.Arc,
                                                    (center_point, radius, start_angle, end_angle,
                                                     line_width, line_color, fill_color)))
@@ -508,6 +538,7 @@ class Canvas:
         # type: (Point, str) -> None
         """Draws a 1×1 rectangle at the given point in the given color. The point is a 2-element tuple or list of screen
         coordinates."""
+        point = self.__ensure_int_coords(point)
         self.__drawing_area.add_object(ObjectHolder(ObjectTypes.Point, (point, color)))
 
     def draw_image(self, image, center_source, width_height_source, center_dest, width_height_dest, rotation=0.0):
@@ -526,6 +557,13 @@ class Canvas:
 
         Specifying a different width or height in the destination than in the source will rescale the image.
         """
+        # First check image is loaded - if not, stop here, to prevent caching of blank images
+        if not image.get_height() or not image.get_width():
+            return
+
+        center_source, width_height_source, center_dest, width_height_dest = self.__ensure_int_coords(
+            center_source, width_height_source, center_dest, width_height_dest
+        )
         self.__drawing_area.add_object(ObjectHolder(ObjectTypes.Image,
                                                     (image, center_source, width_height_source,
                                                      center_dest, width_height_dest, rotation)))

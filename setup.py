@@ -44,12 +44,18 @@ setup(
         'Programming Language :: Python :: 3',
     ],
     packages=['simplequi'],
-    # include_package_data=True,  Might be relevant later
+
+    # Install OpenSSL dlls so PySide2 can retrieve images/sounds from https urls
+    # TODO: check licence and what else might need to be included with this
+    data_files=[
+        ('Lib/site-packages/PySide2', ['ssllib/libcrypto-1_1-x64.dll', 'ssllib/libssl-1_1-x64.dll']),
+    ],
+    # include_package_data=True,  # Might be relevant later
     install_requires=['PySide2>=5.12.0'],  # Currently only support PySide2
     extras_require={
         'dev': [
-            'bump2version==0.6.01',
-            'PySide2>=5.12.0'
+            'bump2version==0.5.11',
+            'PySide2>=5.12.0',
             'setuptools==41.2.0',
             'wheel==0.33.6',
             'sphinx',

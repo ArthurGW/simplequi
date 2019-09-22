@@ -42,6 +42,8 @@ class Image:
         The image can be in any format supported by PySide2.
         An error is raised if the file can't be loaded for any reason.
         """
+        self.__url = url  # Only used for debugging
+
         request_with_callback(url, self.__load_image)
         _IMAGE_CACHE[self] = None
 

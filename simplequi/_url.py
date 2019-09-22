@@ -24,7 +24,10 @@ from typing import Callable
 
 from PySide2.QtCore import QByteArray
 from PySide2.QtCore import QUrl
-from PySide2.QtNetwork import QNetworkRequest, QNetworkReply, QNetworkAccessManager
+from PySide2.QtNetwork import (
+    QNetworkRequest, QNetworkReply, QNetworkAccessManager,
+    # QSslSocket
+)
 
 
 _MANAGER = QNetworkAccessManager()
@@ -34,7 +37,15 @@ def request(url):
     # type: (str) -> QNetworkRequest
     """Construct a network request for the specified url"""
     url = QUrl.fromLocalFile(url) if os.path.isfile(url) else QUrl(url)
-    return QNetworkRequest(url)
+    req = QNetworkRequest(url)
+
+    # REMOVED BUT KEEP FOR REFERENCE FOR NOW
+    # This bit seems dodgy but otherwise often fails the SSL handshake
+    # config = req.sslConfiguration()
+    # config.setPeerVerifyMode(QSslSocket.VerifyNone)
+    # req.setSslConfiguration(config)
+
+    return req
 
 
 def request_with_callback(url, callback):
