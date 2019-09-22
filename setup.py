@@ -46,7 +46,8 @@ setup(
     packages=['simplequi'],
 
     # Install OpenSSL dlls so PySide2 can retrieve images/sounds from https urls
-    # TODO: check licence and what else might need to be included with this
+    # This is illegal in some countries where encryption is not allowed
+    # TODO: check licence and what else might need to be included with this, or remove and write docs instead
     data_files=[
         ('Lib/site-packages/PySide2', ['ssllib/libcrypto-1_1-x64.dll', 'ssllib/libssl-1_1-x64.dll']),
     ],
