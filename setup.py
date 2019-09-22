@@ -55,15 +55,15 @@ setup(
         'simplequi': ['ssllib/*', 'fonts/NK57 Monospace/*'],
     },
     python_requires='>=3.5',
-    install_requires=['PySide2>=5.12.0'],  # Currently only support PySide2
+    install_requires=[
+        'PySide2>=5.12.0',  # Currently only support PySide2
+    ],
     extras_require={
         'dev': [
-            'bump2version==0.5.11',
-            'PySide2>=5.12.0',
-            'setuptools==41.2.0',
-            'wheel==0.33.6',
-            'sphinx',
-            'sphinx-rtd-theme',
+            'bump2version>=0.5.11',
+            'wheel>=0.33.6',
+            'sphinx>=2.2',
+            'sphinx-rtd-theme>=0.4.3',
         ],
     },
 )
