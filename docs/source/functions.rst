@@ -23,7 +23,7 @@ Codeskulptor simplegui API
 The functions below implement the basic methods used to interact with simplegui
 and create objects: frames, timers, images and sounds.
 
-.. module:: simplequi
+.. currentmodule:: simplequi
 
 Create a Frame
 --------------
