@@ -19,16 +19,13 @@
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
-# Initialise an app and get _api for its __all__ list only - these two will not be exported
+# Initialise an app for proper widget creation
 from . import _app
-from . import _api
 
-# The actual exported imports
 from ._api import *
 
-__all__ = _api.__all__
 __version__ = '0.8.0'
+__doc__ = _api.__doc__
 
-# Remove private stuff
-del _api, _app
-
+# Don't export the app
+del _app
