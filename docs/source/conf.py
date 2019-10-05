@@ -12,6 +12,7 @@
 #
 import os
 import sys
+
 sys.path.insert(0, os.path.abspath('../..'))
 
 
@@ -57,8 +58,7 @@ html_theme = 'sphinx_rtd_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-# sphinx_autodoc_typehints
-
+# sphinx_autodoc_typehints config
+always_document_param_types = True
 # set_type_checking_flag = True
 # typehints_fully_qualified = True
-always_document_param_types = True

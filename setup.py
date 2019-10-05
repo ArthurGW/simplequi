@@ -49,7 +49,7 @@ setup(
     packages=['simplequi'],
 
     # Include OpenSSL dlls so PySide2 can retrieve images/sounds from https URLs
-    # This is possibly illegal in some countries where encryption is not allowed
+    # This is possibly illegal in some countries where encryption is not allowed?
     # TODO: consider whether to keep including this or just provide instructions for how to get it
     package_data={
         'simplequi': ['ssllib/*', 'fonts/NK57 Monospace/*'],
@@ -64,6 +64,7 @@ setup(
             'wheel>=0.33.6',
             'sphinx>=2.2',
             'sphinx-rtd-theme>=0.4.3',
+            'sphinx-autodoc-typehints[type_comments]'
         ],
     },
 )

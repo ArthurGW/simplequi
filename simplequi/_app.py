@@ -28,6 +28,7 @@ from PySide2.QtWidgets import QApplication
 class _AppWithRunningFlag(QApplication):
     """Self-starting QApplication with property to say whether it has already been exec_ed"""
 
+    __is_running = False
     tracked = set([])  # Keep track of timers and sounds to know when to quit
 
     def __init__(self):

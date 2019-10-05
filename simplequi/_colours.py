@@ -76,7 +76,7 @@ for colour_name in DEFAULT_COLOURS:
     if QColor.isValidColor(colour_name):
         COLOUR_MAP[colour_name] = QColor(colour_name)
     else:
-        raise ValueError('invalid colour name {colour}'.format(colour=colour_name))
+        raise ValueError('invalid colour name \'{colour}\''.format(colour=colour_name))
 
 
 def _get_float_colour_values(text, factors):
