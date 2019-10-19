@@ -23,30 +23,14 @@ this module should be the :func:`reset_frame` function which will redefine the p
 
 from typing import Callable, Optional, Tuple
 
-from PySide2.QtCore import Qt, QTimer, Signal
-from PySide2.QtGui import QCloseEvent
-from PySide2.QtWidgets import QWidget, QSizePolicy, QHBoxLayout
+from PySide2.QtCore import Qt, QTimer
+from PySide2.QtWidgets import QSizePolicy, QHBoxLayout
 
-from ._app import TheApp  # This just ensures an app has been created
 from ._canvas import DrawingAreaContainer, Canvas
 from ._colours import get_colour
 from ._constants import DEFAULT_FRAME_MARGIN
 from ._fonts import get_text_width_for_font_spec, FontSpec
-from ._widgets import Control, ControlPanelWidget
-
-
-class MainWidget(QWidget):
-    """QWidget that notifies on close"""
-    closed = Signal()  #: Emitted in the closeEvent
-
-    def closeEvent(self, event):
-        # type: (QCloseEvent) -> None
-        """Tells Frame container about this event.
-
-        :param event: the close event
-        """
-        self.closed.emit()
-        super().closeEvent(event)
+from ._widgets import Control, ControlPanelWidget, MainWidget
 
 
 class Frame:
