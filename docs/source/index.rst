@@ -29,10 +29,10 @@ This package implements the Codeskulptor.org simplegui API in a desktop environm
 running using PySide2/Qt.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
    :caption: Contents:
 
-   simplequi
+   modules
    installation
 
 
@@ -40,5 +40,4 @@ Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`

@@ -17,11 +17,11 @@
 .. You should have received a copy of the GNU General Public License
    along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 
-simplequi
-=========
+simplequi package
+=================
 
 .. toctree::
    :maxdepth: 4
 
-   simplequi/simplequi
-
+   functions
+   classes

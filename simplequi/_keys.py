@@ -26,7 +26,7 @@ from PySide2.QtCore import Qt
 class _KeyMap(dict):
     """The keyboard event handlers receive the relevant key as an integer.
 
-    Because different browsers can give different values for the same keystrokes, SimpleQui provides a way to get the
+    Because different browsers can give different values for the same keystrokes, simpleQui provides a way to get the
     appropriate key integer for a given meaning. The acceptable strings for character are the letters 'a'…'z' and
     A'…'Z', the digits '0'…'9', 'space', 'left', 'right', 'up', and 'down'. Note that other keyboard symbols are not
     defined in simplequi.KEY_MAP.

@@ -34,6 +34,8 @@ from ._keys import REVERSE_KEY_MAP
 class Control:
     """A control that lives in the control area of a :class:`~simplequi._frame.Frame`, and allows getting and setting
     of its display text.
+
+    :param widget: the widget that this control wraps
     """
 
     def __init__(self, widget):
