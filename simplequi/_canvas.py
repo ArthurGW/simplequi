@@ -343,7 +343,7 @@ class DrawingArea(QWidget):
         self.__objects = []
         self.__new_objects = []
         self.__draw_handler = None
-        self.__draw_timer_id = -1
+        self.__draw_timer_id = None
 
         # Event stuff
         self.__started = False
@@ -363,7 +363,7 @@ class DrawingArea(QWidget):
         :param draw_handler: function to call every 1/60:sup:`th` of a second (actually 17ms), which gets a
             :class:`Canvas` object as an argument
         """
-        if self.__draw_handler is not None:
+        if self.__draw_handler is not None and self.__draw_timer_id is not None:
             self.killTimer(self.__draw_timer_id)
 
         self.__draw_handler = draw_handler
@@ -404,10 +404,10 @@ class DrawingArea(QWidget):
         painter = QPainter(self.__pixmap)
         painter.setRenderHint(
             QPainter.RenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform))
-        painter.save()
         for obj in self.__objects:
-            painter.restore()
+            painter.save()
             OBJECT_RENDERERS[obj.obj_type](painter, *obj.args)
+            painter.restore()
         self.update()
 
     def add_object(self, primitive):
