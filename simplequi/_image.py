@@ -37,7 +37,7 @@ class Image:
     """Loads an image from the specified URL.
 
     The image can be in any format supported by PySide2.
-    An error is raised if the file can't be loaded for any reason.
+    No error is raised if the file can't be loaded for any reason, it will simply not draw when asked to.
 
     :param url: the URL to load the image from, can be a local file
     """
