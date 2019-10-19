@@ -208,7 +208,12 @@ class Frame:
         # type: (Callable[[Canvas], None]) -> None
         """Adds an event handler that is responsible for all drawing.
 
-        The handler should be defined with one parameter. This parameter will receive a canvas object."""
+        The handler should be defined with one parameter. This parameter will receive a
+        :class:`~simplequi._canvas.Canvas` object.
+
+        :param draw_handler: function to call every 1/60:sup:`th` of a second (actually 17ms), which gets a
+            :class:`~simplequi._canvas.Canvas` object as an argument
+        """
         self.__drawing_area.canvas.set_draw_handler(draw_handler)
 
 

@@ -18,16 +18,18 @@
 # You should have received a copy of the GNU General Public License
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
+"""A few simple constants that are used in multiple other modules"""
+
 from typing import Tuple
 
 from PySide2.QtCore import QMargins
 
 # Widget layouts
-DEFAULT_WIDGET_HEIGHT = 25
-DEFAULT_CONTROL_ENTRY_WIDTH = 200
-DEFAULT_FRAME_MARGIN = QMargins(*([20]*4))
-NO_MARGINS = QMargins()
+DEFAULT_WIDGET_HEIGHT = 25  #: Default height mostly for frame control area widgets
+DEFAULT_CONTROL_ENTRY_WIDTH = 200  #: Default width for controls
+DEFAULT_FRAME_MARGIN = QMargins(*([20]*4))  #: Default widget-free margin around the edges of the frame
+NO_MARGINS = QMargins()  #: No margin on any side
 
 # Types
-Point = Tuple[int, int]
-Size = Point  # Same signature but different name for clarity
+Point = Tuple[int, int]  #: Used for specifying coordinates
+Size = Point  #: Used for specifying width & height pairs

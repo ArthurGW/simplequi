@@ -37,23 +37,23 @@ import re
 from PySide2.QtGui import QColor
 
 
-# Regexps used for parsing colour strings
+# Regexp used for parsing colour strings
 NUM_RE = r'(\d+\.?\d*)'
 NUM_RE = re.compile(NUM_RE)
 
 
 class ColourTypes(Enum):
-    """Conversion factors for various colour formats to put values in valid range and factory functions for QColors"""
+    """Conversion factors for various colour formats to put values in valid range, and factory functions for QColors"""
 
     RGB =     ([255, 255, 255, 1], QColor.fromRgbF)  # Values in range 0-255, 0 <= alpha <= 1
     RGB_PCT = ([100, 100, 100, 1], QColor.fromRgbF)  # Values in percent, 0 <= alpha <= 1
     HSL =     ([360, 100, 100, 1], QColor.fromHslF)  # Hue in range 0-360, S,L in percent, 0 <= alpha <= 1
 
 
-# Cache colours for later retrieval
+#: Cache colours for later retrieval
 COLOUR_MAP = {}
 
-# Cache some default colours named in codeskulptor docs
+#: Cache some default colours named in codeskulptor docs
 DEFAULT_COLOURS = ['Aqua',
                     'Black',
                     'Blue',
@@ -81,7 +81,14 @@ for colour_name in DEFAULT_COLOURS:
 
 def _get_float_colour_values(text, factors):
     # type: (str, list) -> list[float]
-    """Extract float values from colour string and ensure they are all in the valid range 0.0 - 1.0"""
+    """Extracts float values from colour string and ensures they are all in the valid range 0.0 - 1.0.
+
+    :param text: string to scan for colour information
+    :param factors: scaling factor for each value parsed from the colour string
+    :return: list of scaled values to use in ``QColor`` constructors
+
+    :raises ValueError: not enough values are present in ``text`` to apply ``factors`` to, or values are out of range
+    """
     numbers = NUM_RE.findall(text)
     numbers = [float(x) / fact for x, fact in zip(numbers, factors)]
 
@@ -94,17 +101,26 @@ def _get_float_colour_values(text, factors):
     return numbers
 
 
-def _convert_colour_string(name, colour_type):
+def _convert_colour_string(text, colour_type):
     # type: (str, ColourTypes) -> QColor
-    """Convert a string in CSS RGB(A) or HSL(A) format to a QColor"""
+    """Converts a string in CSS RGB(A) or HSL(A) format to a QColor
+
+    :param text: the text specifying the colour parameters
+    :param colour_type: what format ``text`` should be specified in
+    :return: ``QColor`` instance to use elsewhere in the app
+    """
     factors, func = colour_type.value
-    numbers = _get_float_colour_values(name, factors)
+    numbers = _get_float_colour_values(text, factors)
     return func(*numbers)
 
 
 def get_colour(name):
     # type: (str) -> QColor
-    """Translate a colour name in any valid CSS format to a QColor"""
+    """Translates a colour name in any valid CSS format to a QColor
+
+    :param name: name of the colour, or a specification in RGB(A) (with 0-255 or % values) or HSL(A) format
+    :return: ``QColor`` instance to use elsewhere in the app
+    """
     if type(name) != str:
         raise TypeError('invalid colour specifier, should be a string. Got type: {}'.format(type(name)))
 

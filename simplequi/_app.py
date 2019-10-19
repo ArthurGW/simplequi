@@ -29,6 +29,8 @@ class _AppWithRunningFlag(QApplication):
     """Self-starting QApplication with property to say whether it has already been exec_ed"""
 
     __is_running = False
+
+    #: a set of objects the application will monitor to try and work out when to quit
     tracked = set([])  # Keep track of timers and sounds to know when to quit
 
     def __init__(self):
@@ -43,30 +45,51 @@ class _AppWithRunningFlag(QApplication):
         atexit.register(self.exec_)
 
     def exec_(self):
+        """Start the app"""
         if not self.is_running:
             self.__is_running = True
             super().exec_()
 
     def exit(self, retcode):
+        # type: (int) -> None
+        """Exit the app
+
+        :param retcode: the return code of the app
+        """
         self.__is_running = False
         super().exit(retcode)
 
     @property
     def is_running(self):
+        """Whether the app is currently running (has been exec_ed)"""
         return self.__is_running
 
     def add_tracked(self, obj):
-        """Keep an eye on when this object is stopped"""
+        # type: (object) -> None
+        """Keep an eye on when ``stop`` is called on ``obj``.
+
+        Note that it is up to the object itself to actually call :meth:`remove_tracked` when it is stopped.
+
+        :param obj: the object to monitor
+        """
         self.tracked.add(obj)
 
     def remove_tracked(self, obj):
-        """Timer/sound has stopped so remove and check if all objects are done"""
+        # type: (object) -> None
+        """Timer/sound has stopped so remove and check if all objects are done (i.e. ready to quit)
+
+        :param obj: the object that has stopped
+        """
         if obj in self.tracked:
             self.tracked.remove(obj)
         self.__queue_check_for_exit()
 
     def __queue_check_for_exit(self, wait=100):
-        """Check whether to exit, but return to event loop first to allow queued deletions to take place"""
+        # type: (int) -> None
+        """Check whether to exit, but return to event loop first to allow queued deletions to take place
+
+        :param wait: the time in ms to wait until checking, defaults to 100
+        """
         QTimer.singleShot(wait, self.__check_for_exit)
 
     def __check_for_exit(self):

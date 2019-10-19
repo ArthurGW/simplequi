@@ -56,6 +56,12 @@ def create_frame(title, canvas_width, canvas_height, control_width=None):
     The control panel's width in pixels can be specified by the number control_width.
     The canvas width in pixels is the number canvas_width.
     The height in pixels of both the control panel and canvas is the number canvas_height.
+
+    :param title: the title of the frame window
+    :param canvas_width: the width of the drawing area, in pixels
+    :param canvas_height: the height of the drawing area, in pixels
+    :param control_width: the width of the control area of the frame, in pixels
+    :return: a :class:`~simplequi._frame.Frame` that can be used to setup (most of) the rest of the program
     """
     return reset_frame(title, canvas_width, canvas_height, control_width)
 
@@ -66,6 +72,10 @@ def create_timer(interval, timer_handler):
 
     Once started, it will repeatedly call the given event handler at the specified interval, which is given in ms.
     The handler should be defined with no arguments.
+
+    :param interval: the interval at which to call the timer handler, in milliseconds
+    :param timer_handler: a function to call after each interval
+    :return: a :class:`~simplequi._timer.Timer` that calls ``timer_handler`` every ``interval`` ms (once started)
     """
     return Timer(interval, timer_handler)
 
@@ -79,9 +89,7 @@ def load_image(url):
     No error is raised if the file isn't found or is of an unsupported format.
 
     :param url: the URL of the image to load
-    :type url: str
-    :return: an Image object that can be passed to canvas.draw_image
-    :rtype: Image
+    :return: an :class:`~simplequi._image.Image` that can be passed to :meth:`~simplequi._canvas.Canvas.draw_image`
     """
     return Image(url)
 
@@ -93,5 +101,8 @@ def load_sound(url):
 
     Supports whatever audio formats that PySide2 supports.
     No error is raised if the file isn't found or is of an unsupported format.
+
+    :param url: the URL of the sound to load
+    :return: a :class:`~simplequi._sound.Sound` that can be played, paused etc.
     """
     return Sound(url)

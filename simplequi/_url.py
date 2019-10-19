@@ -26,7 +26,6 @@ from PySide2.QtCore import QByteArray
 from PySide2.QtCore import QUrl
 from PySide2.QtNetwork import (
     QNetworkRequest, QNetworkReply, QNetworkAccessManager,
-    # QSslSocket
 )
 
 import importlib.util
@@ -69,6 +68,7 @@ def request(url):
 
     # REMOVED BUT KEEP FOR REFERENCE FOR NOW
     # This bit seems dodgy but otherwise often fails the SSL handshake
+    # from PySide2.QtNetwork import QSslSocket
     # config = req.sslConfiguration()
     # config.setPeerVerifyMode(QSslSocket.VerifyNone)
     # req.setSslConfiguration(config)
