@@ -18,8 +18,10 @@
 # You should have received a copy of the GNU General Public License
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
+"""Utilities for loading images from remote locations and managing caching for rendering."""
 
 from typing import Optional
+from typing import Union
 
 from PySide2.QtCore import QByteArray
 from PySide2.QtGui import QImage, QPixmap, QTransform
@@ -27,21 +29,21 @@ from PySide2.QtGui import QImage, QPixmap, QTransform
 from ._constants import Point, Size
 from ._url import request_with_callback
 
-_IMAGE_CACHE = {}  # Stores the actual QImage for each Image object
-_PIXMAP_CACHE = {}  # Stores pixmaps generated from each QImage for faster rendering
+_IMAGE_CACHE = {}  #: Stores the actual QImage for each Image object
+_PIXMAP_CACHE = {}  #: Stores pixmaps generated from each QImage for faster rendering
 
 
 class Image:
-    """Wrapper around a QImage to provide the codeskulptor image API"""
+    """Loads an image from the specified URL.
+
+    The image can be in any format supported by PySide2.
+    An error is raised if the file can't be loaded for any reason.
+
+    :param url: the URL to load the image from, can be a local file
+    """
 
     def __init__(self, url):
-        # type: (str) -> Image
-        """
-        Loads an image from the specified URL.
-
-        The image can be in any format supported by PySide2.
-        An error is raised if the file can't be loaded for any reason.
-        """
+        # type: (str) -> None
         self.__url = url  # Only used for debugging
 
         request_with_callback(url, self.__load_image)
@@ -49,7 +51,10 @@ class Image:
 
     def __load_image(self, data):
         # type: (QByteArray) -> None
-        """Create the QImage from the data"""
+        """Creates and caches the QImage from the data.
+
+        :param data: the data returned by the network request for the image
+        """
         image = QImage()
         loaded = image.loadFromData(data)
         if loaded:
@@ -81,16 +86,29 @@ class Image:
 
 
 def _get_pixmap_key(image_coords, image_rect, target_rect):
-    """Convert params to hashable string"""
+    # type: (Point, Size, Size) -> str
+    """Convert params to hashable string.
+
+    :param image_coords: the coordinates of the image center
+    :param image_rect: the size of the portion of image to take
+    :param target_rect: the size to scale the portion to
+    :return: all the parameters combined in one string
+    """
     return '{},{},{},{},{},{}'.format(*image_coords, *image_rect, *target_rect)
 
 
 def get_pixmap(image, image_coords, image_rect, target_rect):
-    # type: (Image, Point, Size, Size, float) -> Optional[QPixmap]
+    # type: (Image, Point, Size, Size) -> Union[QPixmap, None]
     """Returns a QPixmap section of the QImage associated with the image object
 
     The section will be taken as a rectangle centred at the image coords given with the given dimensions, scaled to the
     target rectangle size and shape.
+
+    :param image: the :class:`Image` reference to create the pixmap for
+    :param image_coords: the center point on the original image to create the pixmap at
+    :param image_rect: the size of the section of the original image to use
+    :param target_rect: the size to scale the image section to
+    :return: a :class:`QPixmap` containing the new scaled image section, or None if the image is not loaded yet
     """
 
     # Get the actual QImage
