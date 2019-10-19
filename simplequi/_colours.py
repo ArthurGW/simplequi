@@ -107,7 +107,7 @@ def _convert_colour_string(text, colour_type):
 
     :param text: the text specifying the colour parameters
     :param colour_type: what format ``text`` should be specified in
-    :return: ``QColor`` instance to use elsewhere in the app
+    :return: :class:`QColor` instance to use elsewhere in the app
     """
     factors, func = colour_type.value
     numbers = _get_float_colour_values(text, factors)

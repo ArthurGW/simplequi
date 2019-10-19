@@ -18,12 +18,16 @@
 # You should have received a copy of the GNU General Public License
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
+"""Defines and creates a singleton frame instance that is used for all simplequi display.  The only external use of
+this module should be the :func:`reset_frame` function which will redefine the parameters of the singleton."""
+
 from typing import Callable, Optional, Tuple
 
 from PySide2.QtCore import Qt, QTimer, Signal
+from PySide2.QtGui import QCloseEvent
 from PySide2.QtWidgets import QWidget, QSizePolicy, QHBoxLayout
 
-from ._app import TheApp
+from ._app import TheApp  # This just ensures an app has been created
 from ._canvas import DrawingAreaContainer, Canvas
 from ._colours import get_colour
 from ._constants import DEFAULT_FRAME_MARGIN
@@ -33,31 +37,44 @@ from ._widgets import Control, ControlPanelWidget
 
 class MainWidget(QWidget):
     """QWidget that notifies on close"""
-    closed = Signal()
+    closed = Signal()  #: Emitted in the closeEvent
 
     def closeEvent(self, event):
-        """Tell Frame container about this event"""
+        # type: (QCloseEvent) -> None
+        """Tells Frame container about this event.
+
+        :param event: the close event
+        """
         self.closed.emit()
         super().closeEvent(event)
 
 
 class Frame:
-    """Singleton Frame containing all other widgets.
+    """Singleton Frame that contains all other graphical widgets.
+
+    Created in this module as a singleton object with dummy parameters.  Further calls re-initialize the same Frame.
 
     Note the singleton-ness in not strictly enforced here, but the module function 'reset_frame' is the only external
     function that should be used to get Frames, and that simply resets the fixed instance of this class.
+
+    The Frame class is not deleted after instantiation largely for documentation and type hint usages.
+
+    :param title: the text to use in the frame title bar
+    :param canvas_width: the width of the drawing canvas part of the frame
+    :param canvas_height: the height of the drawing canvas part of the frame
+    :param control_width: the optional width of the controls (buttons etc.) part of the frame
     """
-    __called = False  # Whether user has created a frame
-    __first_init = True
+
+    __first_init = True  # True when the only init that has happened is creating the dummy frame
+    __called = False  # Whether user has actually created a frame
     __main_widget = None
 
     def __init__(self, title, canvas_width, canvas_height, control_width=None):
         # type: (str, int, int, Optional[int]) -> None
-        """Create a frame"""
         self.__reset(title, canvas_width, canvas_height, control_width)
 
     def __init_main_widget(self):
-        """Create the main widget"""
+        """Creates the main widget."""
         first_init = self.__main_widget is None
         if not first_init:
             try:
@@ -70,12 +87,20 @@ class Frame:
 
     # Internal
     def __on_main_widget_closed(self):
-        """Remove reference to allow deletion"""
+        """Removes reference to allow garbage collection."""
         self.__main_widget = None
 
     def __reset(self, title, canvas_width, canvas_height, control_width=None):
         # type: (str, int, int, Optional[int]) -> None
-        """Destroys all widgets associated with this frame, stops handlers running, sets params to new values"""
+        """Destroys all widgets associated with this frame, stops handlers running, sets params to new values.
+
+        Arguments are the same as when creating a new frame.
+
+        :param title: the text to use in the frame title bar
+        :param canvas_width: the width of the drawing canvas part of the frame
+        :param canvas_height: the height of the drawing canvas part of the frame
+        :param control_width: the optional width of the controls (buttons etc.) part of the frame
+        """
         self.__init_main_widget()
 
         # Basic window layout
@@ -115,17 +140,24 @@ class Frame:
             QTimer.singleShot(0, self.__check_no_frames_created)
 
     def __check_no_frames_created(self):
-        """If no user-created frame exists, make sure this closes to prevent it keeping the app running"""
+        """Makes sure the main widget closes to prevent it keeping the app running, if the user has not called
+        :func:`simplequi.create_frame` at any point when the app starts.
+        """
         if not self.__called:
             self.__main_widget.close()
 
     def set_canvas_background(self, colour):
         # type: (str) -> None
-        """Changes the background colour of the frame 's canvas, which defaults to black"""
+        """Changes the background colour of the frame's canvas, which defaults to black.
+
+        ..seealso:: :func:`~simplequi._colours.get_colour` defines the allowed colour definitions
+
+        :param colour: the background colour to set, accepts any valid CSS colour
+        """
         self.__drawing_area.set_background_colour(colour)
 
     def start(self):
-        """Commence event handling on the frame (actually on the canvas that handles the events)"""
+        """Commences event handling on the frame (actually on the canvas that handles the events)"""
         self.__drawing_area.canvas.start()
         # TheApp.exec_()
 
@@ -136,15 +168,24 @@ class Frame:
 
         It does not draw the text. This is useful in computing the position to draw text when you want it centered or
         right justified in some region. The supported font faces are the default 'serif', 'sans-serif', and 'monospace'.
+
+        :param text: the text to measure
+        :param size: the font size that would be drawn with
+        :param face: the font face that would be drawn with
+        :return: the width of the text in pixels
         """
         return get_text_width_for_font_spec(text, FontSpec(size, face))
 
     def add_label(self, text, width=None):
         # type: (str, Optional[int]) -> Control
-        """Adds a text label to the control panel
+        """Adds a text label to the control panel.
 
         The width of the label defaults to fit the width of the given text, but can be specified in pixels. If the
         provided width is less than that of the text, the text overflows the label.
+
+        :param text: the label text
+        :param width: the optional label width
+        :return: a handle that can be used to get and set the label text
         """
         return self.__controls.add_label(text, width)
 
@@ -154,6 +195,11 @@ class Frame:
 
         The width of the button defaults to fit the given text, but can be specified in pixels. If the provided width is
         less than that of the text, the text overflows the button.  The handler should be defined with no parameters.
+
+        :param text: the button text
+        :param button_handler: a function to call when the button is clicked
+        :param width: the optional button width
+        :return: a handle that can be used to get and set the button text
         """
         return self.__controls.add_button(text, button_handler, width)
 
@@ -163,44 +209,57 @@ class Frame:
 
         The input field has the given width in pixels. The handler should be defined with one parameter. This parameter
         will receive a string of the text input when the user presses the Enter key.
+
+        :param text: the text of the input field label
+        :param input_handler: a function that is called when the user presses enter in the text input field
+        :param width: the width of the input field
+        :return: a handle that can be used to get and set the input field text
         """
         return self.__controls.add_input(text, input_handler, width)
 
     def set_keydown_handler(self, key_handler):
         # type: (Callable[[int], None]) -> None
-        """Add keyboard event handler waiting for keydown event.
+        """Adds a keyboard event handler waiting for keydown event.
 
         When any key is pressed, the keydown handler is called once. The handler should be defined with one parameter.
         This parameter will receive an integer representing a keyboard character.
+
+        :param key_handler: a function to call when a key is pressed down and the frame is focused
         """
         self.__drawing_area.canvas.set_keydown_handler(key_handler, self.__controls.on_keydown)
 
     def set_keyup_handler(self, key_handler):
         # type: (Callable[[int], None]) -> None
-        """Add keyboard event handler waiting for keyup event.
+        """Adds a keyboard event handler waiting for keyup event.
 
         When any key is released, the keyup handler is called once. The handler should be defined with one parameter.
         This parameter will receive an integer representing a keyboard character.
+
+        :param key_handler: a function to call when a key is released and the frame is focused
         """
         self.__drawing_area.canvas.set_keyup_handler(key_handler, self.__controls.on_keyup)
 
     def set_mouseclick_handler(self, mouse_handler):
         # type: (Callable[[tuple], None]) -> None
-        """Add mouse event handler waiting for mouseclick event.
+        """Adds a mouse event handler waiting for mouseclick event.
 
         When a mouse button is clicked, i.e., pressed and released, the mouseclick handler is called once. The handler
         should be defined with one parameter. This parameter will receive a pair of screen coordinates, i.e., a tuple of
         two non-negative integers.
+
+        :param mouse_handler: a function to call when the mouse is clicked
         """
         self.__drawing_area.canvas.set_mouseclick_handler(mouse_handler, self.__controls.on_mouseclick)
 
     def set_mousedrag_handler(self, mouse_handler):
         # type: (Callable[[Tuple[int, int]], None]) -> None
-        """Add mouse event handler waiting for mousedrag event.
+        """Adds a mouse event handler waiting for mousedrag event.
 
         When a mouse is dragged while the mouse button is being pressed, the mousedrag handler is called for each new
         mouse position. The handler should be defined with one parameter. This parameter will receive a pair of screen
         coordinates, i.e., a tuple of two non-negative integers.
+
+        :param mouse_handler: a function to call when the mouse is clicked and dragged
         """
         self.__drawing_area.canvas.set_mousedrag_handler(mouse_handler, self.__controls.on_mousedrag)
 
@@ -217,12 +276,19 @@ class Frame:
         self.__drawing_area.canvas.set_draw_handler(draw_handler)
 
 
-# Create singleton Frame with dummy params
-FRAME = Frame('', 1, 1)
+# Create Frame with dummy params
+FRAME = Frame('', 1, 1)  #: The singleton frame
 
 
 def reset_frame(title, canvas_width, canvas_height, control_width=None):
     # type: (str, int, int, Optional[int]) -> Frame
-    """Reset the frame singleton and return it"""
+    """Resets the frame singleton.
+
+    :param title: the text to use in the frame title bar
+    :param canvas_width: the width of the drawing canvas part of the frame
+    :param canvas_height: the height of the drawing canvas part of the frame
+    :param control_width: the optional width of the controls (buttons etc.) part of the frame
+    :return: a :class:`Frame` object
+    """
     Frame.__init__(FRAME, title, canvas_width, canvas_height, control_width)
     return FRAME
