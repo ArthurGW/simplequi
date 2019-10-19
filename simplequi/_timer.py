@@ -18,6 +18,8 @@
 # You should have received a copy of the GNU General Public License
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
+"""Contains a single class :class:`Timer` that is used to fire events at known intervals."""
+
 from typing import Callable
 
 from ._app import TheApp
@@ -26,30 +28,34 @@ from PySide2.QtCore import QTimer
 
 
 class Timer:
-    """Container for a StartStopTimer that fires at a given rate and calls a handler"""
+    """Creates a timer.
+
+    Once started, it will repeatedly call the given event handler at the specified interval, which is given in
+    milliseconds. The handler should be defined with no arguments.
+
+    :param interval: how often to call the ``timer_handler``
+    :param timer_handler: a function to call every ``interval`` milliseconds
+    """
 
     def __init__(self, interval, timer_handler):
         # type: (int, Callable[[], None]) -> None
-        """Creates a timer.
-
-        Once started, it will repeatedly call the given event handler at the specified interval, which is given in
-        milliseconds. The handler should be defined with no arguments.
-        """
         self.__timer = QTimer()
         self.__timer.setInterval(interval)
         self.__timer.timeout.connect(timer_handler)
 
     def start(self):
-        """Starts or restarts the timer"""
+        """Starts or restarts the timer."""
         self.__timer.start()
         TheApp.add_tracked(self)
 
     def stop(self):
-        """Stops the timer.  It can be restarted"""
+        """Stops the timer. It can be restarted."""
         self.__timer.stop()
+
+        # Tell TheApp it can close if this timer is all it is waiting for:
         TheApp.remove_tracked(self)
 
     def is_running(self):
         # type: () -> bool
-        """Returns whether the timer is running, i.e., it has been started, but not stopped"""
+        """Returns whether the timer is running, i.e., it has been started, but not stopped."""
         return self.__timer.isActive()
