@@ -27,7 +27,7 @@ from PySide2.QtWidgets import QApplication
 import simplequi
 from simplequi._keys import REVERSE_KEY_MAP
 
-
+# TODO: update and add more tests
 class TestAPI(unittest.TestCase):
     """Basic API sanity checks"""
 
