@@ -23,17 +23,27 @@
 
 from collections import namedtuple
 from enum import Enum
+import pkg_resources
 
 from PySide2.QtCore import QRect
 from PySide2.QtGui import QFont, QFontMetrics, QFontDatabase
-import pkg_resources
 
-# Change the default monospace font to one a bit less wide than Courier New
+# Changes the default monospace font to one a bit less wide than Courier New
 font_path = pkg_resources.resource_filename(__name__, 'resources/fonts/NK57 Monospace/nk57-monospace-sc-rg.ttf')
 monospace = QFontDatabase.addApplicationFont(font_path)
 
 
 class FontFace(Enum):
+    """Describes the three font faces available to users in :meth:`~simplequi._canvas.Canvas.draw_text` calls.
+
+    Users select text by the string face name, e.g.:
+
+    >>>def draw_handler(canvas):
+    >>>    canvas.draw_text('sample', (50, 50), 14, 'red', 'sans-serif')
+    >>>
+    >>>frame.set_draw_handler(draw_handler)
+    """
+
     serif = 'serif'
     sans = 'sans-serif'
     monospace = 'monospace'
@@ -43,38 +53,51 @@ REAL_FONT_FACES = {
     FontFace.serif: 'Times New Roman',
     FontFace.sans: 'Helvetica',
     FontFace.monospace: QFontDatabase.applicationFontFamilies(monospace)[0],
-}
+}  #: Converts the enumed font faces to actual font families that Qt will accept
 
 
 FONT_SCALES = {
     FontFace.serif: None,
     FontFace.sans: None,
     FontFace.monospace: None,
-}
+}  #: Stores scaling factors used to make fonts all the same width for a given font point size
 
 
-FONT_CACHE = {}
-METRICS_CACHE = {}
-FontSpec = namedtuple('FontSpec', ['size', 'face'])
+FONT_CACHE = {}  #: Stores previously called fonts
+METRICS_CACHE = {}  #: Stores metrics used to get font widths per font size
+FontSpec = namedtuple('FontSpec', ['size', 'face'])  #: Used to define a font for caching
 
 
 def _check_is_valid_text(text):
     # type: (str) -> None
-    """Raises ValueError ifthe text can not be printed on the canvas"""
+    """Checks if a text string will be able to be displayed
+
+    :param text: the text to test
+    :raises ValueError: if the text cannot be printed on the canvas
+    """
     if not text.isprintable():
         raise ValueError('text may not contain non-printing characters')
 
 
 def _check_is_valid_font(font_spec):
     # type: (FontSpec) -> None
-    """Raises ValueError if font spec could not be used on the canvas"""
+    """Checks if a font spec defines a font that will be able to be used.
+
+    :param font_spec: the font spec to test
+    :raises ValueError: if font spec could not be used on the canvas
+    """
     if font_spec.size <= 0:
         raise ValueError('invalid font size')
+    FontFace(font_spec.face)
 
 
 def get_font(font_spec):
     # type: (FontSpec) -> QFont
-    """Get and if necessary cache QFont closest to the required params"""
+    """Gets and if necessary caches QFont closest to the required params.
+
+    :param font_spec: defines a font in terms of face/family and size
+    :return: a :class:`QFont` that can be used for example by a :class:`QPainter`
+    """
     if font_spec in FONT_CACHE:
         return FONT_CACHE[font_spec]
 
@@ -90,7 +113,12 @@ def get_font(font_spec):
 
 def _get_text_rect_for_font_spec(text, font_spec):
     # type: (str, FontSpec) -> QRect
-    """Used internally to ensure fonts are all scaled similarly in height"""
+    """Gets the bounding rectangle that encloses the given text rendered with the given font spec.
+
+    :param text: the text to measure
+    :param font_spec: the font to render with
+    :return: a :class:`QRect` that encloses the text
+    """
     _check_is_valid_text(text)
     get_font(font_spec)  # Just ensure font is in cache and metrics cache
     return METRICS_CACHE[font_spec].boundingRect(text)
@@ -98,6 +126,11 @@ def _get_text_rect_for_font_spec(text, font_spec):
 
 def get_text_width_for_font_spec(text, font_spec):
     # type: (str, FontSpec) -> int
-    """Return the width in pixels of the given text for the given font spec"""
+    """Gets the width in pixels of the given text for the given font spec.
+
+    :param text: the text to measure
+    :param font_spec: the font to render with
+    :return: the width of the text bounding rectangle
+    """
     rect = _get_text_rect_for_font_spec(text, font_spec)
     return rect.width()
