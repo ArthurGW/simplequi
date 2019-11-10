@@ -24,7 +24,7 @@ from . import _app
 
 from ._api import *
 
-__version__ = '0.9.0'
+__version__ = '0.9.1'
 __doc__ = _api.__doc__
 
 # Don't export the app
