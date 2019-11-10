@@ -1,6 +1,10 @@
 # NOTE: This script is the default script on loading Codeskulptor, included here as a basic smoke test to target dev
 # efforts towards.  See https://py3.codeskulptor.org/about.html for details of the creation of Codeskulptor itself,
-# including this script.  The copyright in this script is not held by the simplequi creator.  Original script follows:
+# including this script.  The copyright in this script is not held by the simplequi creator.
+
+##########################
+# Original script follows:
+##########################
 
 # CodeSkulptor runs Python programs in your browser.
 # Click the upper left button to run this simple demo.

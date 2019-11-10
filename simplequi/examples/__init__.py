@@ -18,22 +18,3 @@
 # You should have received a copy of the GNU General Public License
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
-"""Count to 10"""
-
-
-import simplequi as simplegui
-
-count = 0
-
-
-def callback():
-    global count
-    count += 1
-    print(count)
-    if count == 10:
-        print('Stop.')
-        timer.stop()
-
-
-timer = simplegui.create_timer(1000, callback)
-timer.start()

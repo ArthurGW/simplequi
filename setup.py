@@ -52,7 +52,9 @@ setup(
     # This is possibly illegal in some countries where encryption is not allowed?
     # TODO: consider whether to keep including this or just provide instructions for how to get it
     package_data={
-        'simplequi': ['ssllib/*', 'fonts/NK57 Monospace/*'],
+        'simplequi': ['ssllib/*',
+                      'fonts/NK57 Monospace/*'
+                      'examples/*'],
     },
     python_requires='>=3.5',
     install_requires=[
