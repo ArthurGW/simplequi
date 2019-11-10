@@ -30,7 +30,7 @@ with open(readme_path, 'r') as readme_file:
 
 setup(
     name='simplequi',
-    version='0.9.1',
+    version='0.9.9',
     description='Run codeskulptor.org programs on the desktop using Qt/PySide2',
     long_description=README,
     long_description_content_type='text/markdown',
@@ -46,15 +46,18 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
-    packages=['simplequi'],
+    packages=[
+        'simplequi',
+        'simplequi.examples'
+    ],
 
     # Include OpenSSL dlls so PySide2 can retrieve images/sounds from https URLs
     # This is possibly illegal in some countries where encryption is not allowed?
     # TODO: consider whether to keep including this or just provide instructions for how to get it
     package_data={
-        'simplequi': ['ssllib/*',
-                      'fonts/NK57 Monospace/*'
-                      'examples/*'],
+        'simplequi': ['resources/ssllib/*.*',
+                      'resources/fonts/NK57 Monospace/*.*'],
+        'simplequi.examples': ['resources/*.*'],
     },
     python_requires='>=3.5',
     install_requires=[
