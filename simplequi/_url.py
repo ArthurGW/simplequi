@@ -19,42 +19,47 @@
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
-import os
 from typing import Callable
 
-from PySide2.QtCore import QByteArray
-from PySide2.QtCore import QUrl
-from PySide2.QtNetwork import (
-    QNetworkRequest, QNetworkReply, QNetworkAccessManager,
-)
+from PySide2.QtCore import QByteArray, QUrl
+from PySide2.QtNetwork import QNetworkRequest, QNetworkReply, QNetworkAccessManager
 
 import importlib.util
 import os
 import pkg_resources
 
-_SSL_DLLS = ['libcrypto-1_1-x64.dll', 'libssl-1_1-x64.dll']
-_CHECKED_SSL_DLLS = []
 
+class ManagerWrapper:
+    __instance = None
 
-def _ensure_openssl_location():
-    """Ensure OpenSSL DLLs are available in PySide2 directory"""
-    _SSL_DLLS = ['libcrypto-1_1-x64.dll', 'libssl-1_1-x64.dll']
+    __SSL_DLLS = ['libcrypto-1_1-x64.dll', 'libssl-1_1-x64.dll']
+    __CHECKED_SSL_DLLS = []
 
-    path = importlib.util.find_spec('PySide2').origin
-    path = os.path.dirname(path)
+    @classmethod
+    def manager(cls):
+        if cls.__instance is None:
+            cls.__instance = QNetworkAccessManager()
 
-    for dll in _SSL_DLLS:
-        _CHECKED_SSL_DLLS.append(dll)
-        dll_target_path = os.path.join(path, dll)
-        if os.path.exists(dll_target_path):
-            continue
+        return cls.__instance
 
-        dll_data = pkg_resources.resource_stream(__name__, 'resources/ssllib/' + dll)
-        with open(dll_target_path, 'wb') as out:
-            out.write(dll_data.read())
+    @classmethod
+    def ensure_openssl_location(cls):
+        """Ensure OpenSSL DLLs are available in PySide2 directory"""
+        if cls.__SSL_DLLS == cls.__CHECKED_SSL_DLLS:
+            return
 
+        path = importlib.util.find_spec('PySide2').origin
+        path = os.path.dirname(path)
 
-_MANAGER = QNetworkAccessManager()
+        for dll in cls.__SSL_DLLS:
+            cls.__CHECKED_SSL_DLLS.append(dll)
+            dll_target_path = os.path.join(path, dll)
+            if os.path.exists(dll_target_path):
+                continue
+
+            dll_data = pkg_resources.resource_stream(__name__, 'resources/ssllib/' + dll)
+            with open(dll_target_path, 'wb') as out:
+                out.write(dll_data.read())
 
 
 def request(url):
@@ -62,8 +67,8 @@ def request(url):
     """Construct a network request for the specified url"""
     url = QUrl.fromLocalFile(url) if os.path.isfile(url) else QUrl(url)
 
-    if url.scheme() == 'https' and _SSL_DLLS != _CHECKED_SSL_DLLS:
-        _ensure_openssl_location()
+    if url.scheme() == 'https':
+        ManagerWrapper.ensure_openssl_location()
     req = QNetworkRequest(url)
 
     # REMOVED BUT KEEP FOR REFERENCE FOR NOW
@@ -80,7 +85,7 @@ def request_with_callback(url, callback):
     # type: (str, Callable[[QByteArray], None]) -> QNetworkReply
     """Make a GET request to the given URL and call a callback on finish"""
     req = request(url)
-    res = _MANAGER.get(req)
+    res = ManagerWrapper.manager().get(req)
     res.finished.connect(lambda: _on_finished(callback, res))
     return res
 

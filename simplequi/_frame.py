@@ -24,7 +24,7 @@ this module should be the :func:`reset_frame` function which will redefine the p
 from typing import Callable, Optional, Tuple
 
 from PySide2.QtCore import Qt, QTimer
-from PySide2.QtWidgets import QSizePolicy, QHBoxLayout
+from PySide2.QtWidgets import QHBoxLayout, QSizePolicy
 
 from ._canvas import DrawingAreaContainer, Canvas
 from ._colours import get_colour
