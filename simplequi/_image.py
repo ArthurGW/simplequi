@@ -20,11 +20,10 @@
 # -----------------------------------------------------------------------------
 """Utilities for loading images from remote locations and managing caching for rendering."""
 
-from typing import Optional
 from typing import Union
 
 from PySide2.QtCore import QByteArray
-from PySide2.QtGui import QImage, QPixmap, QTransform
+from PySide2.QtGui import QImage, QPixmap
 
 from ._constants import Point, Size
 from ._url import request_with_callback

@@ -20,6 +20,7 @@
 # -----------------------------------------------------------------------------
 
 import atexit
+import os
 
 from PySide2.QtCore import QTimer
 from PySide2.QtWidgets import QApplication
@@ -99,7 +100,10 @@ class _AppWithRunningFlag(QApplication):
             self.exit(0)
 
 
-if not QApplication.instance():
+if os.getenv('DOCS_BUILD', False):
+    from unittest.mock import Mock
+    TheApp = Mock()
+elif not QApplication.instance():
     TheApp = _AppWithRunningFlag()
 else:
     TheApp = QApplication.instance()
