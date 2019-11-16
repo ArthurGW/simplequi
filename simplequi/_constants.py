@@ -19,7 +19,7 @@
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 """A few simple constants that are used in multiple other modules"""
-
+import os
 from typing import Tuple
 
 from PySide2.QtCore import QMargins
@@ -33,3 +33,6 @@ NO_MARGINS = QMargins()  #: No margin on any side
 # Types
 Point = Tuple[int, int]  #: Used for specifying coordinates
 Size = Point  #: Used for specifying width & height pairs
+
+# RTD
+DOCS_BUILD = os.getenv('DOCS_BUILD', False)

@@ -20,10 +20,11 @@
 # -----------------------------------------------------------------------------
 
 import atexit
-import os
 
 from PySide2.QtCore import QTimer
 from PySide2.QtWidgets import QApplication
+
+from ._constants import DOCS_BUILD
 
 
 class _AppWithRunningFlag(QApplication):
@@ -40,18 +41,13 @@ class _AppWithRunningFlag(QApplication):
         self.setQuitOnLastWindowClosed(False)  # Since the app needs to stay open if timers are running
         self.lastWindowClosed.connect(self.__queue_check_for_exit)
 
-        # Always run the app, once the setup script is done
-        # This will enter the event loop, which will exit once any frames and timers created are done
-        # TODO: reinstate
-        atexit.register(self.exec_)
-
     def exec_(self):
         """Start the app"""
         if not self.is_running:
             self.__is_running = True
             super().exec_()
 
-    def exit(self, retcode):
+    def exit(self, retcode=0):
         # type: (int) -> None
         """Exit the app
 
@@ -94,17 +90,31 @@ class _AppWithRunningFlag(QApplication):
         QTimer.singleShot(wait, self.__check_for_exit)
 
     def __check_for_exit(self):
-        """If no timers or frames exist, it is time to stop"""
+        """If no tracked timers or sounds, or no frames exist, it is time to stop"""
         if not self.tracked and not self.topLevelWidgets():
             # Done
-            self.exit(0)
+            self.exit()
 
 
-if os.getenv('DOCS_BUILD', False):
-    from unittest.mock import Mock
-    TheApp = Mock()
-elif not QApplication.instance():
-    TheApp = _AppWithRunningFlag()
-else:
-    TheApp = QApplication.instance()
-del _AppWithRunningFlag  # Prevent non-singleton
+def get_app():
+    """Get the application instance unless building docs"""
+    if DOCS_BUILD:
+        from unittest.mock import Mock
+        app = Mock()
+    elif QApplication.instance() is None:
+        app = _AppWithRunningFlag()
+    else:
+        app = QApplication.instance()
+
+    return app
+
+
+def start_app():
+    """Get an run an instance of the app to enter the event loop"""
+    get_app().exec_()
+
+
+# Always run the app, once the setup script is done
+# This will enter the event loop, which will exit once any frames, timers and sounds created are done
+# When building docs, this just calls a Mock so does nothing
+atexit.register(start_app)

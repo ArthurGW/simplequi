@@ -31,7 +31,7 @@ from PySide2.QtCore import QTimerEvent
 from PySide2.QtCore import Qt, QPoint, Signal
 from PySide2.QtGui import (QBrush, QColor, QKeyEvent, QMouseEvent, QPainter, QPaintEvent,
                            QPalette, QPen, QPixmap, QPolygon, QTransform)
-from PySide2.QtWidgets import QWidget, QHBoxLayout
+from PySide2.QtWidgets import QHBoxLayout, QWidget
 
 from ._colours import get_colour
 from ._constants import NO_MARGINS, Point, Size

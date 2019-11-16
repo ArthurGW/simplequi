@@ -22,7 +22,7 @@
 
 from typing import Callable
 
-from ._app import TheApp
+from ._app import get_app
 
 from PySide2.QtCore import QTimer
 
@@ -39,21 +39,24 @@ class Timer:
 
     def __init__(self, interval, timer_handler):
         # type: (int, Callable[[], None]) -> None
+        self.__app = None
         self.__timer = QTimer()
         self.__timer.setInterval(interval)
         self.__timer.timeout.connect(timer_handler)
 
     def start(self):
         """Starts or restarts the timer."""
+        self.__app = get_app()
         self.__timer.start()
-        TheApp.add_tracked(self)
+        self.__app.add_tracked(self)
 
     def stop(self):
         """Stops the timer. It can be restarted."""
         self.__timer.stop()
 
-        # Tell TheApp it can close if this timer is all it is waiting for:
-        TheApp.remove_tracked(self)
+        # Tell the app it can close if this timer is all it is waiting for:
+        self.__app.remove_tracked(self)
+        self.__app = None
 
     def is_running(self):
         # type: () -> bool

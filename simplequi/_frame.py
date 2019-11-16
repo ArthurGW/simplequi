@@ -26,6 +26,7 @@ from typing import Callable, Optional, Tuple
 from PySide2.QtCore import Qt, QTimer
 from PySide2.QtWidgets import QHBoxLayout, QSizePolicy
 
+from ._app import get_app
 from ._canvas import DrawingAreaContainer, Canvas
 from ._colours import get_colour
 from ._constants import DEFAULT_FRAME_MARGIN
@@ -49,23 +50,13 @@ class Frame:
     :param control_width: the optional width of the controls (buttons etc.) part of the frame
     """
 
-    __first_init = True  # True when the only init that has happened is creating the dummy frame
-    __called = False  # Whether user has actually created a frame
-    __main_widget = None
-
     def __init__(self, title, canvas_width, canvas_height, control_width=None):
         # type: (str, int, int, Optional[int]) -> None
+        self.__init_main_widget()
         self.__reset(title, canvas_width, canvas_height, control_width)
 
     def __init_main_widget(self):
         """Creates the main widget."""
-        first_init = self.__main_widget is None
-        if not first_init:
-            try:
-                self.__main_widget.close()
-            except RuntimeError:
-                # Already deleted
-                pass
         self.__main_widget = MainWidget()
         self.__main_widget.closed.connect(self.__on_main_widget_closed)
 
@@ -85,8 +76,6 @@ class Frame:
         :param canvas_height: the height of the drawing canvas part of the frame
         :param control_width: the optional width of the controls (buttons etc.) part of the frame
         """
-        self.__init_main_widget()
-
         # Basic window layout
         self.__main_widget.setWindowTitle(title)
         self.__main_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
@@ -114,21 +103,8 @@ class Frame:
         self.__main_widget.setFocusPolicy(Qt.StrongFocus)
         self.__drawing_area.canvas.setFocus()
 
-        if not self.__first_init:
-            # User has initialised a frame
-            self.__main_widget.show()
-            self.__called = True
-        else:
-            self.__first_init = False
-            # Ensure app closes if no frames are created, won't run until the end of the user's script
-            QTimer.singleShot(0, self.__check_no_frames_created)
-
-    def __check_no_frames_created(self):
-        """Makes sure the main widget closes to prevent it keeping the app running, if the user has not called
-        :func:`simplequi.create_frame` at any point when the app starts.
-        """
-        if not self.__called:
-            self.__main_widget.close()
+        # Begin
+        self.__main_widget.show()
 
     def set_canvas_background(self, colour):
         # type: (str) -> None
@@ -143,7 +119,6 @@ class Frame:
     def start(self):
         """Commences event handling on the frame (actually on the canvas that handles the events)"""
         self.__drawing_area.canvas.start()
-        # TheApp.exec_()
 
     @staticmethod
     def get_canvas_textwidth(text, size, face):
@@ -260,20 +235,26 @@ class Frame:
         self.__drawing_area.canvas.set_draw_handler(draw_handler)
 
 
-if not os.getenv('DOCS_BUILD', False):
-    # Create Frame with dummy params
-    FRAME = Frame('', 1, 1)  #: The singleton frame
+class FrameWrapper:
+    __FRAME = None
+
+    @classmethod
+    def reset_frame(cls, title, canvas_width, canvas_height, control_width=None):
+        # type: (str, int, int, Optional[int]) -> Frame
+        """Resets the frame singleton.
+
+        :param title: the text to use in the frame title bar
+        :param canvas_width: the width of the drawing canvas part of the frame
+        :param canvas_height: the height of the drawing canvas part of the frame
+        :param control_width: the optional width of the controls (buttons etc.) part of the frame
+        :return: a :class:`Frame` object
+        """
+
+        if cls.__FRAME is None:
+            get_app()  # Ensure we have an app
+
+        cls.__FRAME = Frame(title, canvas_width, canvas_height, control_width)
+        return cls.__FRAME
 
 
-def reset_frame(title, canvas_width, canvas_height, control_width=None):
-    # type: (str, int, int, Optional[int]) -> Frame
-    """Resets the frame singleton.
-
-    :param title: the text to use in the frame title bar
-    :param canvas_width: the width of the drawing canvas part of the frame
-    :param canvas_height: the height of the drawing canvas part of the frame
-    :param control_width: the optional width of the controls (buttons etc.) part of the frame
-    :return: a :class:`Frame` object
-    """
-    Frame.__init__(FRAME, title, canvas_width, canvas_height, control_width)
-    return FRAME
+reset_frame = FrameWrapper.reset_frame

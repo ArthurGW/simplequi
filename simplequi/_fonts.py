@@ -28,9 +28,11 @@ import pkg_resources
 from PySide2.QtCore import QRect
 from PySide2.QtGui import QFont, QFontMetrics, QFontDatabase
 
-# Changes the default monospace font to one a bit less wide than Courier New
-font_path = pkg_resources.resource_filename(__name__, 'resources/fonts/NK57 Monospace/nk57-monospace-sc-rg.ttf')
-monospace = QFontDatabase.addApplicationFont(font_path)
+from ._app import get_app
+from ._constants import DOCS_BUILD
+
+
+FontSpec = namedtuple('FontSpec', ['size', 'face'])  #: Used to define a font for caching
 
 
 class FontFace(Enum):
@@ -49,23 +51,33 @@ class FontFace(Enum):
     monospace = 'monospace'
 
 
-REAL_FONT_FACES = {
-    FontFace.serif: 'Times New Roman',
-    FontFace.sans: 'Helvetica',
-    FontFace.monospace: QFontDatabase.applicationFontFamilies(monospace)[0],
-}  #: Converts the enumed font faces to actual font families that Qt will accept
+class FontManager:
+    """Stores various font parameters used by the app"""
 
+    if DOCS_BUILD:
+        monospace = 'monospace'
+    else:
+        _ = get_app()  # Ensure app is initialized
 
-FONT_SCALES = {
-    FontFace.serif: None,
-    FontFace.sans: None,
-    FontFace.monospace: None,
-}  #: Stores scaling factors used to make fonts all the same width for a given font point size
+        # Changes the default monospace font to one a bit less wide than Courier New
+        font_path = pkg_resources.resource_filename(__name__, 'resources/fonts/NK57 Monospace/nk57-monospace-sc-rg.ttf')
+        monospace = QFontDatabase.addApplicationFont(font_path)
+        monospace = QFontDatabase.applicationFontFamilies(monospace)[0]
 
+    REAL_FONT_FACES = {
+        FontFace.serif: 'Times New Roman',
+        FontFace.sans: 'Helvetica',
+        FontFace.monospace: monospace,
+    }  #: Converts the enumed font faces to actual font families that Qt will accept
 
-FONT_CACHE = {}  #: Stores previously called fonts
-METRICS_CACHE = {}  #: Stores metrics used to get font widths per font size
-FontSpec = namedtuple('FontSpec', ['size', 'face'])  #: Used to define a font for caching
+    FONT_SCALES = {
+        FontFace.serif: None,
+        FontFace.sans: None,
+        FontFace.monospace: None,
+    }  #: Stores scaling factors used to make fonts all the same width for a given font point size
+
+    FONT_CACHE = {}  #: Stores previously called fonts
+    METRICS_CACHE = {}  #: Stores metrics used to get font widths per font size
 
 
 def _check_is_valid_text(text):
@@ -98,16 +110,16 @@ def get_font(font_spec):
     :param font_spec: defines a font in terms of face/family and size
     :return: a :class:`QFont` that can be used for example by a :class:`QPainter`
     """
-    if font_spec in FONT_CACHE:
-        return FONT_CACHE[font_spec]
+    if font_spec in FontManager.FONT_CACHE:
+        return FontManager.FONT_CACHE[font_spec]
 
     _check_is_valid_font(font_spec)
     font = QFont()
     font.setPixelSize(font_spec.size)
-    real_face = REAL_FONT_FACES[FontFace(font_spec.face)]
+    real_face = FontManager.REAL_FONT_FACES[FontFace(font_spec.face)]
     font.setFamily(real_face)
-    FONT_CACHE[font_spec] = font
-    METRICS_CACHE[font_spec] = QFontMetrics(font)
+    FontManager.FONT_CACHE[font_spec] = font
+    FontManager.METRICS_CACHE[font_spec] = QFontMetrics(font)
     return font
 
 
@@ -121,7 +133,7 @@ def _get_text_rect_for_font_spec(text, font_spec):
     """
     _check_is_valid_text(text)
     get_font(font_spec)  # Just ensure font is in cache and metrics cache
-    return METRICS_CACHE[font_spec].boundingRect(text)
+    return FontManager.METRICS_CACHE[font_spec].boundingRect(text)
 
 
 def get_text_width_for_font_spec(text, font_spec):

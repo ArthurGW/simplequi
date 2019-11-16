@@ -19,13 +19,7 @@
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
-# Initialise an app for proper widget creation
-from . import _app
-
 from ._api import *
 
 __version__ = '0.9.1'
 __doc__ = _api.__doc__
-
-# Don't export the app
-del _app
