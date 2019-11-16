@@ -19,7 +19,9 @@
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
-from PySide2.QtMultimedia import QAudio, QMediaPlayer, QMediaContent
+from ._constants import DOCS_BUILD
+if not DOCS_BUILD:
+    from PySide2.QtMultimedia import QAudio, QMediaPlayer, QMediaContent
 
 from ._app import get_app
 from ._url import request
