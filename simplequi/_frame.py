@@ -20,7 +20,7 @@
 # -----------------------------------------------------------------------------
 """Defines and creates a singleton frame instance that is used for all simplequi display.  The only external use of
 this module should be the :func:`reset_frame` function which will redefine the parameters of the singleton."""
-
+import os
 from typing import Callable, Optional, Tuple
 
 from PySide2.QtCore import Qt, QTimer
@@ -260,8 +260,9 @@ class Frame:
         self.__drawing_area.canvas.set_draw_handler(draw_handler)
 
 
-# Create Frame with dummy params
-FRAME = Frame('', 1, 1)  #: The singleton frame
+if not os.getenv('DOCS_BUILD', False):
+    # Create Frame with dummy params
+    FRAME = Frame('', 1, 1)  #: The singleton frame
 
 
 def reset_frame(title, canvas_width, canvas_height, control_width=None):
