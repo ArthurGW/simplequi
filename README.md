@@ -1,6 +1,6 @@
 # WORK IN PROGRESS
 
-# simpleQui v0.10.1
+# simpleQui v0.10.2
 Run codeskulptor.org programs on the desktop using Qt/PySide2
 
 ## Usage
