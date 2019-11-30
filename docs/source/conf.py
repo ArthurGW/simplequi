@@ -44,7 +44,7 @@ copyright = '2019, Arthur Gordon-Wright'
 author = 'Arthur Gordon-Wright'
 
 # The full version, including alpha/beta/rc tags
-release = '0.9.1'
+release = '0.10.0'
 
 
 # -- General configuration ---------------------------------------------------

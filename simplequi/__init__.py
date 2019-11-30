@@ -21,5 +21,5 @@
 
 from ._api import *
 
-__version__ = '0.9.1'
+__version__ = '0.10.0'
 __doc__ = _api.__doc__
