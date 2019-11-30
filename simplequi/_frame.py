@@ -18,31 +18,19 @@
 # You should have received a copy of the GNU General Public License
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
-"""Defines and creates a singleton frame instance that is used for all simplequi display.  The only external use of
-this module should be the :func:`reset_frame` function which will redefine the parameters of the singleton."""
-import os
+
+"""Defines a :class:`Frame` that is used for all :module:`simplequi` display"""
+
 from typing import Callable, Optional, Tuple
 
-from PySide2.QtCore import Qt, QTimer
-from PySide2.QtWidgets import QHBoxLayout, QSizePolicy
-
 from ._app import get_app
-from ._canvas import DrawingAreaContainer, Canvas
-from ._colours import get_colour
-from ._constants import DEFAULT_FRAME_MARGIN
+from ._canvas import Canvas
 from ._fonts import get_text_width_for_font_spec, FontSpec
-from ._widgets import Control, ControlPanelWidget, MainWidget
+from ._widgets import Control, MainWidget
 
 
 class Frame:
-    """Singleton Frame that contains all other graphical widgets.
-
-    Created in this module as a singleton object with dummy parameters.  Further calls re-initialize the same Frame.
-
-    Note the singleton-ness in not strictly enforced here, but the module function 'reset_frame' is the only external
-    function that should be used to get Frames, and that simply resets the fixed instance of this class.
-
-    The Frame class is not deleted after instantiation largely for documentation and type hint usages.
+    """Frame that contains all other graphical widgets
 
     :param title: the text to use in the frame title bar
     :param canvas_width: the width of the drawing canvas part of the frame
@@ -52,59 +40,16 @@ class Frame:
 
     def __init__(self, title, canvas_width, canvas_height, control_width=None):
         # type: (str, int, int, Optional[int]) -> None
-        self.__init_main_widget()
-        self.__reset(title, canvas_width, canvas_height, control_width)
+        get_app()  # Ensure an application has been created before creating widgets
 
-    def __init_main_widget(self):
-        """Creates the main widget."""
-        self.__main_widget = MainWidget()
+        self.__main_widget = MainWidget(title, canvas_width, canvas_height, control_width)
         self.__main_widget.closed.connect(self.__on_main_widget_closed)
+        self.__main_widget.show()
 
     # Internal
     def __on_main_widget_closed(self):
         """Removes reference to allow garbage collection."""
         self.__main_widget = None
-
-    def __reset(self, title, canvas_width, canvas_height, control_width=None):
-        # type: (str, int, int, Optional[int]) -> None
-        """Destroys all widgets associated with this frame, stops handlers running, sets params to new values.
-
-        Arguments are the same as when creating a new frame.
-
-        :param title: the text to use in the frame title bar
-        :param canvas_width: the width of the drawing canvas part of the frame
-        :param canvas_height: the height of the drawing canvas part of the frame
-        :param control_width: the optional width of the controls (buttons etc.) part of the frame
-        """
-        # Basic window layout
-        self.__main_widget.setWindowTitle(title)
-        self.__main_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        palette = self.__main_widget.palette()
-        palette.setColor(palette.Window, get_colour('white'))
-        self.__main_widget.setPalette(palette)
-
-        # Widgets layout
-        self.__main_layout = QHBoxLayout()
-        self.__main_layout.setSizeConstraint(QHBoxLayout.SetFixedSize)
-        self.__main_layout.setSpacing(DEFAULT_FRAME_MARGIN.left())
-        self.__main_layout.setContentsMargins(DEFAULT_FRAME_MARGIN)
-        self.__controls = ControlPanelWidget(self.__main_widget, canvas_height, control_width)
-        self.__drawing_area = DrawingAreaContainer(self.__main_widget, canvas_width, canvas_height)
-
-        total_height = self.__drawing_area.height() + DEFAULT_FRAME_MARGIN.top() * 2
-        self.__main_widget.setFixedHeight(total_height)
-
-        self.__main_layout.addWidget(self.__controls, alignment=Qt.Alignment(Qt.AlignLeft | Qt.AlignTop))
-        self.__main_layout.addWidget(self.__drawing_area, alignment=Qt.AlignCenter)
-        self.__main_widget.setLayout(self.__main_layout)
-
-        # Setup for key handling
-        self.__main_widget.setFocusProxy(self.__drawing_area.canvas)
-        self.__main_widget.setFocusPolicy(Qt.StrongFocus)
-        self.__drawing_area.canvas.setFocus()
-
-        # Begin
-        self.__main_widget.show()
 
     def set_canvas_background(self, colour):
         # type: (str) -> None
@@ -114,11 +59,11 @@ class Frame:
 
         :param colour: the background colour to set, accepts any valid CSS colour
         """
-        self.__drawing_area.set_background_colour(colour)
+        self.__main_widget.drawing_area.set_background_colour(colour)
 
     def start(self):
         """Commences event handling on the frame (actually on the canvas that handles the events)"""
-        self.__drawing_area.canvas.start()
+        self.__main_widget.canvas.start()
 
     @staticmethod
     def get_canvas_textwidth(text, size, face):
@@ -146,7 +91,7 @@ class Frame:
         :param width: the optional label width
         :return: a handle that can be used to get and set the label text
         """
-        return self.__controls.add_label(text, width)
+        return self.__main_widget.controls.add_label(text, width)
 
     def add_button(self, text, button_handler, width=None):
         # type: (str, Callable[[], None], Optional[int]) -> Control
@@ -160,7 +105,7 @@ class Frame:
         :param width: the optional button width
         :return: a handle that can be used to get and set the button text
         """
-        return self.__controls.add_button(text, button_handler, width)
+        return self.__main_widget.controls.add_button(text, button_handler, width)
 
     def add_input(self, text, input_handler, width):
         # type: (str, Callable[[str], None], int) -> Control
@@ -174,7 +119,7 @@ class Frame:
         :param width: the width of the input field
         :return: a handle that can be used to get and set the input field text
         """
-        return self.__controls.add_input(text, input_handler, width)
+        return self.__main_widget.controls.add_input(text, input_handler, width)
 
     def set_keydown_handler(self, key_handler):
         # type: (Callable[[int], None]) -> None
@@ -185,7 +130,7 @@ class Frame:
 
         :param key_handler: a function to call when a key is pressed down and the frame is focused
         """
-        self.__drawing_area.canvas.set_keydown_handler(key_handler, self.__controls.on_keydown)
+        self.__main_widget.canvas.set_keydown_handler(key_handler, self.__main_widget.controls.on_keydown)
 
     def set_keyup_handler(self, key_handler):
         # type: (Callable[[int], None]) -> None
@@ -196,7 +141,7 @@ class Frame:
 
         :param key_handler: a function to call when a key is released and the frame is focused
         """
-        self.__drawing_area.canvas.set_keyup_handler(key_handler, self.__controls.on_keyup)
+        self.__main_widget.canvas.set_keyup_handler(key_handler, self.__main_widget.controls.on_keyup)
 
     def set_mouseclick_handler(self, mouse_handler):
         # type: (Callable[[tuple], None]) -> None
@@ -208,7 +153,7 @@ class Frame:
 
         :param mouse_handler: a function to call when the mouse is clicked
         """
-        self.__drawing_area.canvas.set_mouseclick_handler(mouse_handler, self.__controls.on_mouseclick)
+        self.__main_widget.canvas.set_mouseclick_handler(mouse_handler, self.__main_widget.controls.on_mouseclick)
 
     def set_mousedrag_handler(self, mouse_handler):
         # type: (Callable[[Tuple[int, int]], None]) -> None
@@ -220,7 +165,7 @@ class Frame:
 
         :param mouse_handler: a function to call when the mouse is clicked and dragged
         """
-        self.__drawing_area.canvas.set_mousedrag_handler(mouse_handler, self.__controls.on_mousedrag)
+        self.__main_widget.canvas.set_mousedrag_handler(mouse_handler, self.__main_widget.controls.on_mousedrag)
 
     def set_draw_handler(self, draw_handler):
         # type: (Callable[[Canvas], None]) -> None
@@ -232,29 +177,4 @@ class Frame:
         :param draw_handler: function to call every 1/60:sup:`th` of a second (actually 17ms), which gets a
             :class:`~simplequi._canvas.Canvas` object as an argument
         """
-        self.__drawing_area.canvas.set_draw_handler(draw_handler)
-
-
-class FrameWrapper:
-    __FRAME = None
-
-    @classmethod
-    def reset_frame(cls, title, canvas_width, canvas_height, control_width=None):
-        # type: (str, int, int, Optional[int]) -> Frame
-        """Resets the frame singleton.
-
-        :param title: the text to use in the frame title bar
-        :param canvas_width: the width of the drawing canvas part of the frame
-        :param canvas_height: the height of the drawing canvas part of the frame
-        :param control_width: the optional width of the controls (buttons etc.) part of the frame
-        :return: a :class:`Frame` object
-        """
-
-        if cls.__FRAME is None:
-            get_app()  # Ensure we have an app
-
-        cls.__FRAME = Frame(title, canvas_width, canvas_height, control_width)
-        return cls.__FRAME
-
-
-reset_frame = FrameWrapper.reset_frame
+        self.__main_widget.canvas.set_draw_handler(draw_handler)

@@ -25,9 +25,12 @@ from typing import Callable, Optional
 from PySide2.QtCore import Qt, Signal
 from PySide2.QtGui import QTextOption, QKeyEvent
 from PySide2.QtWidgets import (QLabel, QPushButton, QPlainTextEdit, QWidget,
-                               QFrame, QVBoxLayout)
+                               QFrame, QVBoxLayout, QSizePolicy, QHBoxLayout)
 
-from ._constants import DEFAULT_WIDGET_HEIGHT, DEFAULT_CONTROL_ENTRY_WIDTH, NO_MARGINS, Point
+from simplequi._canvas import DrawingArea
+from ._canvas import DrawingAreaContainer
+from ._colours import get_colour
+from ._constants import DEFAULT_CONTROL_ENTRY_WIDTH, DEFAULT_FRAME_MARGIN, DEFAULT_WIDGET_HEIGHT, NO_MARGINS, Point
 from ._keys import REVERSE_KEY_MAP
 
 
@@ -300,9 +303,46 @@ class ControlPanelWidget(QWidget):
 
 
 class MainWidget(QWidget):
-    """QWidget that notifies when it is asked to close."""
+    """Widget that contains all other graphical widgets
+
+    :param title: the text to use in the frame title bar
+    :param canvas_width: the width of the drawing canvas part of the frame
+    :param canvas_height: the height of the drawing canvas part of the frame
+    :param control_width: the optional width of the controls (buttons etc.) part of the frame
+    """
 
     closed = Signal()  #: Emitted in the closeEvent
+
+    def __init__(self, title, canvas_width, canvas_height, control_width=None):
+        # type: (str, int, int, Optional[int]) -> None
+        super().__init__()
+
+        # Basic window layout - title, colour, sizing
+        self.setWindowTitle(title)
+        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        palette = self.palette()
+        palette.setColor(palette.Window, get_colour('white'))
+        self.setPalette(palette)
+
+        # Widgets layout
+        self.__main_layout = QHBoxLayout()
+        self.__main_layout.setSizeConstraint(QHBoxLayout.SetFixedSize)
+        self.__main_layout.setSpacing(DEFAULT_FRAME_MARGIN.left())
+        self.__main_layout.setContentsMargins(DEFAULT_FRAME_MARGIN)
+        self.__controls = ControlPanelWidget(self, canvas_height, control_width)
+        self.__drawing_area = DrawingAreaContainer(self, canvas_width, canvas_height)
+
+        total_height = self.__drawing_area.height() + DEFAULT_FRAME_MARGIN.top() * 2
+        self.setFixedHeight(total_height)
+
+        self.__main_layout.addWidget(self.__controls, alignment=Qt.Alignment(Qt.AlignLeft | Qt.AlignTop))
+        self.__main_layout.addWidget(self.__drawing_area, alignment=Qt.AlignCenter)
+        self.setLayout(self.__main_layout)
+
+        # Setup for key handling
+        self.setFocusProxy(self.__drawing_area.canvas)
+        self.setFocusPolicy(Qt.StrongFocus)
+        self.__drawing_area.canvas.setFocus()
 
     def closeEvent(self, event):
         # type: (QCloseEvent) -> None
@@ -312,3 +352,21 @@ class MainWidget(QWidget):
         """
         self.closed.emit()
         super().closeEvent(event)
+
+    @property
+    def canvas(self):
+        # type: () -> DrawingArea
+        """The actual widget that does drawing"""
+        return self.drawing_area.canvas
+
+    @property
+    def controls(self):
+        # type: () -> ControlPanelWidget
+        """The controls area on the left-hand side of the widget"""
+        return self.__controls
+
+    @property
+    def drawing_area(self):
+        # type: () -> DrawingAreaContainer
+        """Container for the canvas drawing area on the right-hand side of the widget"""
+        return self.__drawing_area

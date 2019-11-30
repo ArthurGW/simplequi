@@ -25,7 +25,7 @@ The returned objects from these functions all implement their own APIs defined i
 from typing import Callable, Optional
 
 from ._canvas import Canvas
-from ._frame import reset_frame, Frame
+from ._frame import Frame
 from ._image import Image
 from ._keys import KEY_MAP
 from ._sound import Sound
@@ -63,7 +63,7 @@ def create_frame(title, canvas_width, canvas_height, control_width=None):
     :param control_width: the width of the control area of the frame, in pixels
     :return: a :class:`~simplequi._frame.Frame` that can be used to setup (most of) the rest of the program
     """
-    return reset_frame(title, canvas_width, canvas_height, control_width)
+    return Frame(title, canvas_width, canvas_height, control_width)
 
 
 def create_timer(interval, timer_handler):
