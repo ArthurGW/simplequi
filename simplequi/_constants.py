@@ -33,6 +33,3 @@ NO_MARGINS = QMargins()  #: No margin on any side
 # Types
 Point = Tuple[int, int]  #: Used for specifying coordinates
 Size = Point  #: Used for specifying width & height pairs
-
-# RTD
-DOCS_BUILD = os.getenv('DOCS_BUILD', False)

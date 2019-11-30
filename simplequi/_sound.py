@@ -21,7 +21,7 @@
 
 from PySide2.QtMultimedia import QAudio, QMediaPlayer, QMediaContent
 
-from ._app import get_app
+from ._app import TheApp
 from ._url import request
 
 
@@ -38,8 +38,11 @@ class Sound:
 
     def __init__(self, url):
         # type: (str) -> None
-        self.__app = get_app()
         self.__url = url  # Only used for debugging
+
+        # Tell the app not to quit while this sound is loading, since it is plausible that a user is using sounds
+        # without using a frame or any timers:
+        TheApp.add_tracked(self)
 
         req = request(url)
         content = QMediaContent(req)
@@ -48,10 +51,6 @@ class Sound:
         self.__player.setMedia(content)
         self.__player.mediaStatusChanged.connect(self.__on_status_changed)
         self.__player.error.connect(self.__on_status_changed)
-
-        # Tell the app not to quit while this sound is loading, since it is plausible that a user is using sounds
-        # without using a frame or any timers:
-        self.__app.add_tracked(self)
 
         self.__sound_loaded = False
         self.__play_requested = False
@@ -81,27 +80,27 @@ class Sound:
         else:
             self.__sound_loaded = False
         self.__play_requested = False
-        self.__app.remove_tracked(self)
+        TheApp.remove_tracked(self)
 
     def play(self):
         """Starts playing a sound, or restarts playing it at the point it was paused."""
         if self.__sound_loaded:
             self.__player.play()
-            self.__app.add_tracked(self)
+            TheApp.add_tracked(self)
         self.__play_requested = True
 
     def pause(self):
         """Stops the playing of the sound. Playing can be restarted at the stopped point with :meth:`play`."""
         if self.__sound_loaded:
             self.__player.pause()
-            self.__app.remove_tracked(self)
+            TheApp.remove_tracked(self)
         self.__play_requested = False
 
     def rewind(self):
         """Stops playing the sound, makes it so the next :meth:`play` will start playing the sound at the beginning."""
         if self.__sound_loaded:
             self.__player.stop()
-            self.__app.remove_tracked(self)
+            TheApp.remove_tracked(self)
         self.__play_requested = False
 
     def set_volume(self, volume):

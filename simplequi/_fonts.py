@@ -23,13 +23,13 @@
 
 from collections import namedtuple
 from enum import Enum
+from unittest.mock import Mock
 import pkg_resources
 
 from PySide2.QtCore import QRect
 from PySide2.QtGui import QFont, QFontMetrics, QFontDatabase
 
-from ._app import get_app
-from ._constants import DOCS_BUILD
+from ._app import TheApp
 
 
 FontSpec = namedtuple('FontSpec', ['size', 'face'])  #: Used to define a font for caching
@@ -54,11 +54,10 @@ class FontFace(Enum):
 class FontManager:
     """Stores various font parameters used by the app"""
 
-    if DOCS_BUILD:
+    if isinstance(TheApp, Mock):
+        # We must be building docs so don't create the real font
         monospace = 'monospace'
     else:
-        _ = get_app()  # Ensure app is initialized
-
         # Changes the default monospace font to one a bit less wide than Courier New
         font_path = pkg_resources.resource_filename(__name__, 'resources/fonts/NK57 Monospace/nk57-monospace-sc-rg.ttf')
         monospace = QFontDatabase.addApplicationFont(font_path)

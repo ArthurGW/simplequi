@@ -20,29 +20,30 @@
 # -----------------------------------------------------------------------------
 
 import atexit
+import os
+
+from unittest.mock import MagicMock
 
 from PySide2.QtCore import QTimer
 from PySide2.QtWidgets import QApplication
-
-from ._constants import DOCS_BUILD
 
 
 class _AppWithRunningFlag(QApplication):
     """Self-starting QApplication with property to say whether it has already been exec_ed"""
 
-    __is_running = False
-
-    #: a set of objects the application will monitor to try and work out when to quit
-    tracked = set([])  # Keep track of timers and sounds to know when to quit
-
     def __init__(self):
         super().__init__([])
         self.__is_running = False
-        self.setQuitOnLastWindowClosed(False)  # Since the app needs to stay open if timers are running
-        self.lastWindowClosed.connect(self.__queue_check_for_exit)
+        #: a set of objects the application will monitor to try and work out when to quit
+        self.tracked = set([])  # Keep track of timers and sounds to know when to quit
+
+        self.setQuitOnLastWindowClosed(False)  # Since the app needs to stay open if timers, sounds etc. are running
+
+        atexit.register(self.exec_)
 
     def exec_(self):
         """Start the app"""
+        print('asdasda')
         if not self.is_running:
             self.__is_running = True
             super().exec_()
@@ -54,6 +55,7 @@ class _AppWithRunningFlag(QApplication):
         :param retcode: the return code of the app
         """
         self.__is_running = False
+        self.tracked = set([])
         super().exit(retcode)
 
     @property
@@ -63,9 +65,9 @@ class _AppWithRunningFlag(QApplication):
 
     def add_tracked(self, obj):
         # type: (object) -> None
-        """Keep an eye on when ``stop`` is called on ``obj``.
+        """Add an object that will prevent the app closing until this object removes itself from tracking
 
-        Note that it is up to the object itself to actually call :meth:`remove_tracked` when it is stopped.
+        Note that it is up to the object itself to actually call :meth:`remove_tracked` when appropriate.
 
         :param obj: the object to monitor
         """
@@ -73,9 +75,9 @@ class _AppWithRunningFlag(QApplication):
 
     def remove_tracked(self, obj):
         # type: (object) -> None
-        """Timer/sound has stopped so remove and check if all objects are done (i.e. ready to quit)
+        """Object doesn't require tracking any more so remove and check if all objects are done (i.e. ready to quit)
 
-        :param obj: the object that has stopped
+        :param obj: the object to be removed
         """
         if obj in self.tracked:
             self.tracked.remove(obj)
@@ -90,31 +92,17 @@ class _AppWithRunningFlag(QApplication):
         QTimer.singleShot(wait, self.__check_for_exit)
 
     def __check_for_exit(self):
-        """If no tracked timers or sounds, or no frames exist, it is time to stop"""
-        if not self.tracked and not self.topLevelWidgets():
+        """If no tracked timers, sounds or frames exist, it is time to stop"""
+        if not self.tracked:
             # Done
             self.exit()
 
 
-def get_app():
-    """Get the application instance unless building docs"""
-    if DOCS_BUILD:
-        from unittest.mock import Mock
-        app = Mock()
-    elif QApplication.instance() is None:
-        app = _AppWithRunningFlag()
-    else:
-        app = QApplication.instance()
+# Set the application instance unless building docs when a mock is used
+if os.getenv('DOCS_BUILD', False):
+    TheApp = MagicMock(spec_set=_AppWithRunningFlag)
+else:
+    TheApp = _AppWithRunningFlag()
 
-    return app
-
-
-def start_app():
-    """Get an run an instance of the app to enter the event loop"""
-    get_app().exec_()
-
-
-# Always run the app, once the setup script is done
-# This will enter the event loop, which will exit once any frames, timers and sounds created are done
-# When building docs, this just calls a Mock so does nothing
-atexit.register(start_app)
+# Prevent re-instantiation
+del _AppWithRunningFlag

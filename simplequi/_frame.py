@@ -23,7 +23,7 @@
 
 from typing import Callable, Optional, Tuple
 
-from ._app import get_app
+from ._app import TheApp
 from ._canvas import Canvas
 from ._fonts import get_text_width_for_font_spec, FontSpec
 from ._widgets import Control, MainWidget
@@ -40,7 +40,7 @@ class Frame:
 
     def __init__(self, title, canvas_width, canvas_height, control_width=None):
         # type: (str, int, int, Optional[int]) -> None
-        get_app()  # Ensure an application has been created before creating widgets
+        TheApp.add_tracked(self)  # Tell app to not close while self is open
 
         self.__main_widget = MainWidget(title, canvas_width, canvas_height, control_width)
         self.__main_widget.closed.connect(self.__on_main_widget_closed)
@@ -50,6 +50,7 @@ class Frame:
     def __on_main_widget_closed(self):
         """Removes reference to allow garbage collection."""
         self.__main_widget = None
+        TheApp.remove_tracked(self)  # App can now possibly close
 
     def set_canvas_background(self, colour):
         # type: (str) -> None
