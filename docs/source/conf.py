@@ -66,7 +66,12 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
-autodoc_mock_imports = ['PySide2.QtMultimedia']  # This has a weird libpulse failure on RTD
+autodoc_mock_imports = ['PySide2',
+                        'PySide2.QtCore',
+                        'PySide2.QtWidgets',
+                        'PySide2.QtGui',
+                        'PtSide2.QtNetwork',
+                        'PySide2.QtMultimedia']
 
 
 # -- Options for HTML output -------------------------------------------------

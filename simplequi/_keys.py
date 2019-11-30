@@ -22,8 +22,10 @@
 
 from PySide2.QtCore import Qt
 
+from ._mapping import MappingWithInitCheck
 
-class _KeyMap(dict):
+
+class _KeyMap(MappingWithInitCheck):
     """The keyboard event handlers receive the relevant key as an integer.
 
     Because different browsers can give different values for the same keystrokes, simpleQui provides a way to get the
@@ -32,25 +34,74 @@ class _KeyMap(dict):
     defined in simplequi.KEY_MAP.
     """
 
+    def _init_map(self):
+        """Store the key map entries for all keys allowed by simplegui"""
+        # Special keys
+        self.update({
+            'space': int(Qt.Key_Space),
+            'left': int(Qt.Key_Left),
+            'right': int(Qt.Key_Right),
+            'up': int(Qt.Key_Up),
+            'down': int(Qt.Key_Down),
+        })
+
+        # 0 - 9
+        for ind in range(10):
+            ordinal = 48 + ind
+            key = Qt.Key_0 + ind
+            self[chr(ordinal)] = key
+
+        # A - Z
+        for ind in range(26):
+            ordinal = 65 + ind
+            key = int((Qt.Key_A + ind) | Qt.ShiftModifier)
+            self[chr(ordinal)] = key
+
+        # a - z
+        for ind in range(26):
+            ordinal = 97 + ind
+            key = Qt.Key_A + ind
+            self[chr(ordinal)] = key
+
     def __missing__(self, key_name):
         # type: (str) -> None
-        """Handles users attempting to get a key integer for an undefined key.
+        """
+        Inform the user that they have attempted to look up an invalid key name
 
         Note that the error message refers to simplegui, since the keys allowed are defined there. In theory, more could
         be allowed here, but for consistency the same set is kept.
 
-        :param key_name: the key the user was attempting to look up
-        :raises KeyError: always, as the keys are all defined and cached within this module
+        :param key_name: the key the user is attempting to look up
+        :raises KeyError: always, as the requested key is not allowed by simplegui
         """
         raise KeyError('key {} is not a valid simplegui keyboard symbol'.format(key_name))
 
 
-class _ReverseKeyMap(dict):
+class _ReverseKeyMap(MappingWithInitCheck):
     """This is used to get a string representation of a pressed key, including unicode arrows."""
 
+    def __init__(self, key_map):
+        # type: (_KeyMap) -> None
+        super().__init__()
+        self.__forward_map = key_map
+
+    def _init_map(self):
+        """Set up the reverse key mapping"""
+        # Ensure the forward map is initialised
+        self.__forward_map.get('up')
+
+        # Reverse map the values from the forward map
+        self.update({value: key for key, value in self.__forward_map.items()})
+
+        # Override display for direction keys to display nice arrow symbols instead of text like 'left'
+        self[self.__forward_map['up']] = '⭡'
+        self[self.__forward_map['right']] = '⭢'
+        self[self.__forward_map['down']] = '⭣'
+        self[self.__forward_map['left']] = '⭠'
+
     def __missing__(self, key_value):
-        # type: (str) -> None
-        """Handles getting a key representation for an as-yet-undefined key.
+        # type: (str) -> str
+        """Handles getting a key representation for an unrecognised key value
 
         :param key_value: the key to create a display string for
         :return: a string representation of the key for display
@@ -59,47 +110,5 @@ class _ReverseKeyMap(dict):
         return self[key_value]
 
 
-#################################################
-# Now store the key values for all allowed keys:
-#################################################
-
-
-# Special keys
-KEY_MAP = _KeyMap({
-    'space': int(Qt.Key_Space),
-    'left': int(Qt.Key_Left),
-    'right': int(Qt.Key_Right),
-    'up': int(Qt.Key_Up),
-    'down': int(Qt.Key_Down),
-})  #: This is the key map cache instance that is accessible to users
-
-# 0 - 9
-for ind in range(10):
-    ordinal = 48 + ind
-    key = Qt.Key_0 + ind
-    KEY_MAP[chr(ordinal)] = key
-
-# A - Z
-for ind in range(26):
-    ordinal = 65 + ind
-    key = int((Qt.Key_A + ind) | Qt.ShiftModifier)
-    KEY_MAP[chr(ordinal)] = key
-
-# a - z
-for ind in range(26):
-    ordinal = 97 + ind
-    key = Qt.Key_A + ind
-    KEY_MAP[chr(ordinal)] = key
-
-#######################################################################
-# Create the reverse key lookup for displaying pressed keys in the UI:
-#######################################################################
-
-# Basic keys
-REVERSE_KEY_MAP = _ReverseKeyMap({value: key for key, value in KEY_MAP.items()})
-
-# Override display for direction keys to display nice arrow symbols instead of text like 'left'
-REVERSE_KEY_MAP[KEY_MAP['up']] = '⭡'
-REVERSE_KEY_MAP[KEY_MAP['right']] = '⭢'
-REVERSE_KEY_MAP[KEY_MAP['down']] = '⭣'
-REVERSE_KEY_MAP[KEY_MAP['left']] = '⭠'
+KEY_MAP = _KeyMap()  #: This is the key map cache instance that is accessible to users
+REVERSE_KEY_MAP = _ReverseKeyMap(KEY_MAP)  #: This is only used for generating displayed key strings
