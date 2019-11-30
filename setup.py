@@ -45,7 +45,7 @@ INSTALL_REQUIREMENTS += ['PySide2>=5.12.0'] if not os.getenv('DOCS_BUILD', False
 
 setup(
     name='simplequi',
-    version='0.10.0',
+    version='0.10.1',
     description='Run codeskulptor.org programs on the desktop using Qt/PySide2',
     long_description=README,
     long_description_content_type='text/markdown',
