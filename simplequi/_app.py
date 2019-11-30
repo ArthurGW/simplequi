@@ -43,7 +43,6 @@ class _AppWithRunningFlag(QApplication):
 
     def exec_(self):
         """Start the app"""
-        print('asdasda')
         if not self.is_running:
             self.__is_running = True
             super().exec_()

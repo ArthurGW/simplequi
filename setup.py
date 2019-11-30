@@ -28,6 +28,21 @@ readme_path = os.path.join(this_dir, 'README.md')
 with open(readme_path, 'r') as readme_file:
     README = readme_file.read()
 
+BUILD_REQUIREMENTS = [
+    'bump2version>=0.5.11',
+    'wheel>=0.33.6',
+]
+
+DOCS_REQUIREMENTS = [
+    'sphinx>=2.2',
+    'sphinx-rtd-theme>=0.4.3',
+    'sphinx-autodoc-typehints[type_comments]'
+]
+
+INSTALL_REQUIREMENTS = []
+INSTALL_REQUIREMENTS += ['PySide2>=5.12.0'] if not os.getenv('DOCS_BUILD', False) else []  # Don't use PySide2 on RTD
+
+
 setup(
     name='simplequi',
     version='0.9.9',
@@ -60,16 +75,10 @@ setup(
         'simplequi.examples': ['resources/*.*'],
     },
     python_requires='>=3.5',
-    install_requires=[
-        'PySide2>=5.12.0',  # Currently only support PySide2
-    ],
+    install_requires=INSTALL_REQUIREMENTS,
     extras_require={
-        'dev': [
-            'bump2version>=0.5.11',
-            'wheel>=0.33.6',
-            'sphinx>=2.2',
-            'sphinx-rtd-theme>=0.4.3',
-            'sphinx-autodoc-typehints[type_comments]'
-        ],
+        'build': BUILD_REQUIREMENTS,
+        'dev': BUILD_REQUIREMENTS + DOCS_REQUIREMENTS,
+        'docs': DOCS_REQUIREMENTS,
     },
 )
