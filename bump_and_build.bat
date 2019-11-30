@@ -1,4 +1,4 @@
 bump2version %1 --verbose
 python setup.py bdist_wheel
-docs/make clean
-docs/make html
+CALL docs/make.bat clean
+CALL docs/make.bat html
