@@ -31,10 +31,6 @@ class TestColours(unittest.TestCase):
 
     Exercises internal functions but mostly only uses external get_colour api"""
 
-    @classmethod
-    def tearDownClass(cls):
-        QApplication.instance().lastWindowClosed.emit()
-
     def assertTupleAlmostEqual(self, t1, t2, msg='', dp=3):
         """Fuzzy comparer for tuples with floating point entries"""
 
@@ -144,7 +140,7 @@ class TestColours(unittest.TestCase):
             self.assertTupleAlmostEqual(get_colour(inp).getRgbF(), out)
 
         for inp in bad_data:
-            self.assertRaises(ValueError, lambda: get_colour(inp))
+            self.assertRaises(KeyError, lambda: get_colour(inp))
 
     def test_named_colours(self):
         """Test valid and invalid named colours"""
@@ -169,20 +165,22 @@ class TestColours(unittest.TestCase):
             self.assertTupleAlmostEqual(get_colour(inp).getRgbF(), out)
 
         for inp in bad_data:
-            self.assertRaises(ValueError, lambda: get_colour(inp))
+            self.assertRaises(KeyError, lambda: get_colour(inp))
 
     def test_invalid_names(self):
         """Test invalid colour strings not covered by other cases"""
         bad_data = [
-            ('', ValueError),
-            ([], TypeError),
-            ({}, TypeError),
-            ((), TypeError),
-            ('#$(%@', ValueError),
+            '',
+            '#$(%@',
         ]
 
-        for inp, exc in bad_data:
-            self.assertRaises(exc, lambda: get_colour(inp))
+        for inp in bad_data:
+            self.assertRaises(KeyError, lambda: get_colour(inp))
+
+        bad_types = ((), {}, [], set([]))
+
+        for inp in bad_types:
+            self.assertRaises(TypeError, lambda: get_colour(inp))
 
 
 if __name__ == '__main__':

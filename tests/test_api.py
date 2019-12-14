@@ -31,20 +31,17 @@ from simplequi._keys import REVERSE_KEY_MAP
 class TestAPI(unittest.TestCase):
     """Basic API sanity checks"""
 
-    @classmethod
-    def tearDownClass(cls):
-        QApplication.instance().lastWindowClosed.emit()
-
     def test_image(self):
         self.fail('Not implemented')
 
-    @unittest.skip('Sounds not done yet')
     def test_sound(self):
         self.fail('Not implemented')
 
     def test_key_map(self):
         """Test all keys in map and reverse mapped to same value"""
-        self.assertEqual(67, len(simplequi.KEY_MAP))
+        self.assertEqual(0, len(simplequi.KEY_MAP))  # Map not initialised yet
+        _ = simplequi.KEY_MAP['space']
+        self.assertEqual(67, len(simplequi.KEY_MAP))  # Initialised by value lookup
 
         special_keys = {
             'left': '⭠',

@@ -45,6 +45,7 @@ class _AppWithRunningFlag(QApplication):
         """Start the app"""
         if not self.is_running:
             self.__is_running = True
+            self.__queue_check_for_exit()
             super().exec_()
 
     def exit(self, retcode=0):
