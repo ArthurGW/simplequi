@@ -1,4 +1,4 @@
-simpleQui v0.10.3
+simpleQui v0.10.4
 =================
 
 Run codeskulptor.org programs on the desktop using Qt/PySide2
