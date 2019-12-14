@@ -39,7 +39,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'simpleQui'
+project = 'simplequi'
 copyright = '2019, Arthur Gordon-Wright'
 author = 'Arthur Gordon-Wright'
 
@@ -55,7 +55,8 @@ release = '0.10.3'
 extensions = [
     'sphinx_rtd_theme',
     'sphinx.ext.autodoc',
-    'sphinx_autodoc_typehints'
+    'sphinx_autodoc_typehints',
+    'm2r',
 ]
 
 # Add any paths that contain templates here, relative to this directory.

@@ -36,7 +36,8 @@ BUILD_REQUIREMENTS = [
 DOCS_REQUIREMENTS = [
     'sphinx>=2.2',
     'sphinx-rtd-theme>=0.4.3',
-    'sphinx-autodoc-typehints[type_comments]'
+    'sphinx-autodoc-typehints[type_comments]',
+    'm2r',
 ]
 
 INSTALL_REQUIREMENTS = []

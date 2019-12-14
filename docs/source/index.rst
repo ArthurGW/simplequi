@@ -17,27 +17,27 @@
 .. You should have received a copy of the GNU General Public License
    along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 
-.. simpleQui documentation master file, created by
+.. simplequi documentation master file, created by
    sphinx-quickstart on Sat Sep 14 16:29:43 2019.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to simpleQui's documentation!
+Welcome to simplequi's documentation!
 =====================================
 
 This package implements the Codeskulptor.org simplegui API in a desktop environment,
-running using PySide2/Qt.
+running using PySide2/Qt.  See the :doc:`readme` for installation and usage instructions.
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 3
    :caption: Contents:
 
-   modules
-   installation
+   readme
+
+   simplequi/simplequi
 
 
 Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`search`

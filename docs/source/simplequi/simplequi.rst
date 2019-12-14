@@ -17,8 +17,14 @@
 .. You should have received a copy of the GNU General Public License
    along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 
-simplequi package
-=================
+simplequi usage
+===============
+
+See the documents below for everything you can currently do with simplequi.  :doc:`functions`
+lists everything in the simplequi module itself, i.e. anything run by simplequi.function, e.g.
+:func:`simplequi.create_frame`.  :doc:`classes` describes the usage of the classes returned
+by the simplequi functions, such as :class:`~simplequi._frame.Frame`, :class:`~simplequi._timer.Timer`
+etc.
 
 .. toctree::
    :maxdepth: 4
