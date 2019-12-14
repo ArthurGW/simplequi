@@ -36,8 +36,7 @@ running using PySide2/Qt.  See the :doc:`readme` for installation and usage inst
 
    simplequi/simplequi
 
-
-Indices and tables
-==================
+Index
+=====
 
 * :ref:`genindex`
