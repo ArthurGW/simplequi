@@ -2,6 +2,8 @@
 
 *v0.10.3*
 
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
 Run codeskulptor.org programs on the desktop using Qt/PySide2
 
 To run an existing codeskulptor script on your local machine, simply import simplequi as simplegui:
