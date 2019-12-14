@@ -31,18 +31,9 @@ from simplequi._keys import REVERSE_KEY_MAP
 class TestAPI(unittest.TestCase):
     """Basic API sanity checks"""
 
-    NOT_IMP_API = [
-        ('load_sound', ('http://iana.org/_img/2015.1/iana-logo-homepage.svg',)),
-    ]
-
     @classmethod
     def tearDownClass(cls):
         QApplication.instance().lastWindowClosed.emit()
-
-    def test_api_not_currently_implemented(self):
-        for func, args in self.NOT_IMP_API:
-            func = getattr(simplequi, func)
-            self.assertRaises(NotImplementedError, func, *args)
 
     def test_image(self):
         self.fail('Not implemented')
@@ -76,9 +67,7 @@ class TestAPI(unittest.TestCase):
             self.assertIn(key, REVERSE_KEY_MAP)
 
     def test_create_frame(self):
-        self.assertIs(simplequi.create_frame('Old Title', 200, 120), simplequi.create_frame('Title', 100, 100))
-        f = simplequi.create_frame('AGAIN', 1, 1, 1)
-        f._Frame__main_widget.close()
+        self.fail('Not implemented')
 
 
 if __name__ == '__main__':

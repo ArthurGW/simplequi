@@ -25,10 +25,10 @@ from PySide2.QtCore import Qt
 from ._mapping import MappingWithInitCheck
 
 
-class _KeyMap(MappingWithInitCheck):
+class KeyMap(MappingWithInitCheck):
     """The keyboard event handlers receive the relevant key as an integer.
 
-    Because different browsers can give different values for the same keystrokes, simpleQui provides a way to get the
+    Because different browsers can give different values for the same keystrokes, simplequi provides a way to get the
     appropriate key integer for a given meaning. The acceptable strings for character are the letters 'a'…'z' and
     A'…'Z', the digits '0'…'9', 'space', 'left', 'right', 'up', and 'down'. Note that other keyboard symbols are not
     defined in simplequi.KEY_MAP.
@@ -63,6 +63,28 @@ class _KeyMap(MappingWithInitCheck):
             key = Qt.Key_A + ind
             self[chr(ordinal)] = key
 
+    def __getitem__(self, key):
+        # type: (str) -> int
+        """
+        x.__getitem__('y') <==> x['y']
+
+        Get the value that is sent to a handler for a given key press.
+
+        This is usually called using square brackets, like ``value = simplequi.KEY_MAP['space']``
+
+        :param key: the key press to look up
+        :return: the integer value for the key
+        :raises KeyError: if the key is not in the map for simplegui
+
+        Example usage::
+
+            def key_handler(self, key):
+                if key == simplequi.KEY_MAP['left']:
+                    print('Left key pressed!')
+                    self.move_ship_left()
+        """
+        return super().__getitem__(key)
+
     def __missing__(self, key_name):
         # type: (str) -> None
         """
@@ -81,7 +103,7 @@ class _ReverseKeyMap(MappingWithInitCheck):
     """This is used to get a string representation of a pressed key, including unicode arrows."""
 
     def __init__(self, key_map):
-        # type: (_KeyMap) -> None
+        # type: (KeyMap) -> None
         super().__init__()
         self.__forward_map = key_map
 
@@ -110,5 +132,5 @@ class _ReverseKeyMap(MappingWithInitCheck):
         return self[key_value]
 
 
-KEY_MAP = _KeyMap()  #: This is the key map cache instance that is accessible to users
+KEY_MAP = KeyMap()  #: This is the key map cache instance that is accessible to users
 REVERSE_KEY_MAP = _ReverseKeyMap(KEY_MAP)  #: This is only used for generating displayed key strings

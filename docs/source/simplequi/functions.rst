@@ -45,3 +45,8 @@ Load a Sound from a URL
 
 .. autofunction:: load_sound
 
+Lookup the Value for a Key Press
+--------------------------------
+
+.. autoclass:: simplequi._keys.KeyMap
+   :members: __getitem__
