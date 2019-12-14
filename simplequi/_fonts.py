@@ -2,19 +2,19 @@
 # Copyright ©2019 Arthur Gordon-Wright
 # <https://github.com/ArthurGW/simplequi>
 # <simplequi.codeskulptor@gmail.com>
-# 
+#
 # This file is part of simplequi.
-# 
+#
 # simplequi is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # simplequi is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
@@ -53,15 +53,13 @@ class FontFace(Enum):
 
 class FontManager:
     """Stores various font parameters used by the app"""
-
-    if isinstance(TheApp, Mock):
-        # We must be building docs so don't create the real font
-        monospace = 'monospace'
-    else:
+    monospace = 'monospace'
+    if not isinstance(TheApp, Mock):
         # Changes the default monospace font to one a bit less wide than Courier New
         font_path = pkg_resources.resource_filename(__name__, 'resources/fonts/NK57 Monospace/nk57-monospace-sc-rg.ttf')
-        monospace = QFontDatabase.addApplicationFont(font_path)
-        monospace = QFontDatabase.applicationFontFamilies(monospace)[0]
+        if font_path:
+            monospace = QFontDatabase.addApplicationFont(font_path)
+            monospace = QFontDatabase.applicationFontFamilies(monospace)[0]
 
     REAL_FONT_FACES = {
         FontFace.serif: 'Times New Roman',

@@ -21,8 +21,6 @@
 
 import unittest
 
-from PySide2.QtWidgets import QApplication
-
 from simplequi._colours import get_colour, COLOUR_MAP, DEFAULT_COLOURS
 
 

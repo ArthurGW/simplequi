@@ -2,19 +2,19 @@
 # Copyright ©2019 Arthur Gordon-Wright
 # <https://github.com/ArthurGW/simplequi>
 # <simplequi.codeskulptor@gmail.com>
-# 
+#
 # This file is part of simplequi.
-# 
+#
 # simplequi is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # simplequi is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
@@ -64,9 +64,9 @@ DEFAULT_COLOURS = ['Aqua',
 #: Cache some default colours named in codeskulptor docs
 class ColourTypes(Enum):
     """Conversion factors for various colour formats to put values in valid range, and factory functions for QColors"""
-    RGB =     ([255, 255, 255, 1], QColor.fromRgbF)  # Values in range 0-255, 0 <= alpha <= 1
+    RGB = ([255, 255, 255, 1], QColor.fromRgbF)  # Values in range 0-255, 0 <= alpha <= 1
     RGB_PCT = ([100, 100, 100, 1], QColor.fromRgbF)  # Values in percent, 0 <= alpha <= 1
-    HSL =     ([360, 100, 100, 1], QColor.fromHslF)  # Hue in range 0-360, S,L in percent, 0 <= alpha <= 1
+    HSL = ([360, 100, 100, 1], QColor.fromHslF)  # Hue in range 0-360, S,L in percent, 0 <= alpha <= 1
 
 
 class _ColourMap(MappingWithInitCheck):

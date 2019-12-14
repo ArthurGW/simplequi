@@ -2,6 +2,11 @@
 
 *v0.10.3*
 
+![Build Status](https://github.com/ArthurGW/simplequi/workflows/build/badge.svg)
+![Test Status](https://github.com/ArthurGW/simplequi/workflows/tests/badge.svg)
+[![Documentation Status](https://readthedocs.org/projects/simplequi/badge/?version=stable)](https://simplequi.readthedocs.io/en/stable/?badge=stable)
+
+[![PyPI version](https://badge.fury.io/py/simplequi.svg)](https://pypi.org/project/simplequi)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 Run codeskulptor.org programs on the desktop using Qt/PySide2

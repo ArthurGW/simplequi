@@ -20,6 +20,7 @@
 # -----------------------------------------------------------------------------
 
 import os
+import sys
 import unittest
 
 
@@ -28,4 +29,6 @@ if __name__ == '__main__':
     loader = unittest.defaultTestLoader
     suite = loader.discover(path)
     runner = unittest.TextTestRunner()
-    runner.run(suite)
+    result = runner.run(suite)
+    if result.testsRun and not result.wasSuccessful():
+        sys.exit(1)

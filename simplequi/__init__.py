@@ -19,7 +19,23 @@
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
-from ._api import *
+from . import _api
+from ._api import (KEY_MAP, create_frame, create_timer, load_image, load_sound,
+                   Frame, Canvas, Control, Image, Sound, Timer)
+
+__all__ = [
+    'KEY_MAP',
+    'create_frame',
+    'create_timer',
+    'load_image',
+    'load_sound',
+    'Frame',
+    'Canvas',
+    'Control',
+    'Image',
+    'Sound',
+    'Timer',
+   ]
+__doc__ = _api.__doc__
 
 __version__ = '0.10.3'
-__doc__ = _api.__doc__

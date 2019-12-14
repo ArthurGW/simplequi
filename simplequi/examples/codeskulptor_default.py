@@ -16,14 +16,17 @@ import simplequi as simplegui
 
 message = "Welcome!"
 
+
 # Handler for mouse click
 def click():
     global message
     message = "Good job!"
 
+
 # Handler to draw on canvas
 def draw(canvas):
-    canvas.draw_text(message, [50,112], 48, "Red")
+    canvas.draw_text(message, [50, 112], 48, "Red")
+
 
 # Create a frame and assign callbacks to event handlers
 frame = simplegui.create_frame("Home", 300, 200)
