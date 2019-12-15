@@ -20,51 +20,50 @@
 # -----------------------------------------------------------------------------
 
 import unittest
+from unittest.mock import patch
 
-from PySide2.QtCore import Qt
+from PySide2.QtWidgets import QApplication
 
-import simplequi
-from simplequi._keys import REVERSE_KEY_MAP
+# This import is just used for ensuring the app is initialized, hence the ignore below
+import simplequi  # noqa: F401
 
 
-# TODO: update and add more tests
-class TestAPI(unittest.TestCase):
-    """Basic API sanity checks"""
+class TestApp(unittest.TestCase):
+    """Test application tracking of objects and exit checking"""
+    def setUp(self):
+        self.app = QApplication.instance()
 
-    def test_image(self):
-        self.fail('Not implemented')
+    def test_app(self):
+        """Test adding and removing objects"""
+        # These mocks needs to be here so the app can exit properly after this method ends
+        with patch('PySide2.QtWidgets.QApplication.exit') as exit_func:
+            with patch.object(self.app, '_AppWithRunningFlag__queue_check_for_exit') as queue_check:
+                queue_check.side_effect = self.app._AppWithRunningFlag__check_for_exit
+                # Starts empty
+                self.assertSetEqual(self.app.tracked, set([]))
 
-    def test_sound(self):
-        self.fail('Not implemented')
+                # Add two objects
+                obj = object()
+                obj2 = object()
+                self.app.add_tracked(obj)
+                self.app.add_tracked(obj2)
+                self.assertSetEqual(self.app.tracked, {obj, obj2})
 
-    def test_key_map(self):
-        """Test all keys in map and reverse mapped to same value"""
-        self.assertEqual(0, len(simplequi.KEY_MAP))  # Map not initialised yet
-        _ = simplequi.KEY_MAP['space']
-        self.assertEqual(67, len(simplequi.KEY_MAP))  # Initialised by value lookup
+                # Checking for exit should not exit with tracked objects
+                queue_check()
+                exit_func.assert_not_called()
 
-        special_keys = {
-            'left': '⭠',
-            'right': '⭢',
-            'up': '⭡',
-            'down': '⭣'
-        }
+                # Remove one and check exit not called
+                self.app.remove_tracked(obj2)
+                self.assertSetEqual(self.app.tracked, {obj})
+                queue_check.assert_has_calls([])
+                exit_func.assert_not_called()
 
-        # Test known keys
-        for key, val in simplequi.KEY_MAP.items():
-            if key in special_keys:
-                self.assertEqual(special_keys[key], REVERSE_KEY_MAP[val], 'mismatch in forward and reverse key maps')
-            else:
-                self.assertEqual(key, REVERSE_KEY_MAP[val], 'mismatch in forward and reverse key maps')
-
-        # Test unknown keys
-        for key in {Qt.Key_Enter, Qt.Key_Backspace, Qt.Key_Tab}:
-            self.assertNotIn(key, REVERSE_KEY_MAP)
-            self.assertEqual(REVERSE_KEY_MAP[key], '<{}>'.format(key))
-            self.assertIn(key, REVERSE_KEY_MAP)
-
-    def test_create_frame(self):
-        self.fail('Not implemented')
+                # Remove the last one, exit should now be called
+                self.app.remove_tracked(obj)
+                self.assertSetEqual(self.app.tracked, set([]))
+                queue_check.assert_has_calls([])
+                exit_func.assert_called_once_with(0)
 
 
 if __name__ == '__main__':

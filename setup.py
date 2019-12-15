@@ -68,7 +68,7 @@ setup(
     ],
 
     # Include OpenSSL dlls so PySide2 can retrieve images/sounds from https URLs
-    # This is possibly illegal in some countries where encryption is not allowed?
+    # This may have legal issues in some countries where encryption is not allowed?
     # TODO: consider whether to keep including this or just provide instructions for how to get it
     package_data={
         'simplequi': ['resources/ssllib/*.*',
