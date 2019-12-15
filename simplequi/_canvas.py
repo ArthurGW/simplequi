@@ -58,8 +58,7 @@ def point_list_to_polygon(point_list):
     :param point_list: ordered iterable of points that make up the polygon
     :return: a polygon with the given points
     """
-    num_points = len(point_list)
-    polygon = QPolygon(num_points)
+    polygon = QPolygon()
     for point in point_list:
         polygon.push_back(QPoint(*point))
     return polygon

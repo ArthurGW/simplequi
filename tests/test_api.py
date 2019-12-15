@@ -87,7 +87,7 @@ class TestAPI(unittest.TestCase):
         """Test image is loaded"""
         os.chdir(os.path.dirname(__file__))
         image = simplequi.load_image('../simplequi/examples/resources/sample_image.png')
-        _timer = simplequi.create_timer(100, QApplication.instance().exit)
+        simplequi.create_timer(100, QApplication.instance().exit).start()
         QApplication.instance().exec_()
         self.assertEqual(image.get_width(), 1000)
         self.assertEqual(image.get_height(), 1200)
@@ -97,7 +97,7 @@ class TestAPI(unittest.TestCase):
         os.chdir(os.path.dirname(__file__))
         sound = simplequi.load_sound('../simplequi/examples/resources/425556__planetronik__rock-808-beat.mp3')
         sound2 = simplequi.load_sound('../simplequi/examples/resources/253756_tape-on.wav')
-        _timer = simplequi.create_timer(200, QApplication.instance().exit)
+        simplequi.create_timer(200, QApplication.instance().exit).start()
         QApplication.instance().exec_()
         self.assertTrue(sound._Sound__sound_loaded)
         self.assertTrue(sound2._Sound__sound_loaded)
