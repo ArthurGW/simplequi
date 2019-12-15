@@ -512,21 +512,25 @@ class DrawingArea(QWidget):
     def keyPressEvent(self, event):
         # type: (QKeyEvent) -> None
         self.keydown.emit(int(event.key()))
+        event.accept()
 
     @check_started
     def keyReleaseEvent(self, event):
         # type: (QKeyEvent) -> None
         self.keyup.emit(int(event.key()))
+        event.accept()
 
     @check_started
     def mouseReleaseEvent(self, event):
         # type: (QMouseEvent) -> None
         self.mouseclick.emit(event.pos().toTuple())
+        event.accept()
 
     @check_started
     def mouseMoveEvent(self, event):
         # type: (QMouseEvent) -> None
         self.mousedrag.emit(event.pos().toTuple())
+        event.accept()
 
 
 class DrawingAreaContainer(QWidget):

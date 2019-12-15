@@ -113,7 +113,7 @@ class PlainTextSingleLine(QPlainTextEdit):
         :param e: the :class:`QKeyEvent` that has occurred
         """
         if e.key() in self.__caught_keys:
-            return
+            return e.accept()
 
         super().keyPressEvent(e)
 
@@ -126,7 +126,7 @@ class PlainTextSingleLine(QPlainTextEdit):
         if e.key() in self.__caught_keys:
             self.focusNextChild()
             self.enter_pressed.emit(self.toPlainText())
-            return
+            return e.accept()
 
         super().keyReleaseEvent(e)
 
