@@ -21,15 +21,18 @@
 
 import unittest
 
-from PySide2.QtWidgets import QApplication
+from PySide2.QtCore import Qt
 
 import simplequi
+from simplequi._keys import REVERSE_KEY_MAP
 
 
-class TestTimer(unittest.TestCase):
-    """Tested separately from other API as it needs to run in the event loop"""
-    pass
+# TODO: update and add more tests
+class TestFrame(unittest.TestCase):
+    """Test Frame API"""
 
+    def test_create_frame(self):
+        self.fail('Not implemented')
 
 
 if __name__ == '__main__':
