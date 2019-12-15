@@ -73,10 +73,12 @@ class Sound:
         error = self.__player.error()
         status = self.__player.mediaStatus()
         if error == QMediaPlayer.NoError and QMediaPlayer.LoadedMedia <= status < QMediaPlayer.InvalidMedia:
-            self.__sound_loaded = True
-            if self.__play_requested and status != QMediaPlayer.EndOfMedia:
-                # Play and don't do anything else now
-                return self.play()
+            # Check if the media is actually an audio file that is playable
+            if self.__player.isAudioAvailable():
+                self.__sound_loaded = True
+                if self.__play_requested and status != QMediaPlayer.EndOfMedia:
+                    # Play and don't do anything else now
+                    return self.play()
         else:
             self.__sound_loaded = False
         self.__play_requested = False
