@@ -34,10 +34,10 @@ jobs:
         flake8 simplequi --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Get libpulse on ubuntu
       if: matrix.os == 'ubuntu-latest'
-      run: sudo apt install libpulse-dev
+      run: apt install libpulse-dev
     - name: Get libpulse on macos
       if: matrix.os == 'macos-latest'
-      run: sudo brew install libpulse-dev
+      run: brew install libpulse-dev
     - name: Test with test script (unittest based)
       env:
         QT_QPA_PLATFORM: minimal
