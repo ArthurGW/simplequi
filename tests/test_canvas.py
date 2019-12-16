@@ -23,7 +23,7 @@ import math
 import unittest
 from unittest.mock import call, Mock, patch
 
-from PySide2.QtCore import QPoint, Qt, QByteArray, QBuffer, QIODevice
+from PySide2.QtCore import QPoint, Qt
 from PySide2.QtGui import QPolygon, QFont, QTransform, QPalette, QMouseEvent, QKeyEvent, QPixmap, QColor
 from PySide2.QtWidgets import QWidget, QApplication
 
@@ -31,6 +31,7 @@ import simplequi
 from simplequi._canvas import Canvas, DrawingAreaContainer
 from simplequi._colours import get_colour
 from simplequi._fonts import FontManager
+from tests.helpers import pixmap_to_bytes
 
 
 class TestCanvas(unittest.TestCase):
@@ -135,14 +136,6 @@ class TestCanvas(unittest.TestCase):
         actual_painter.setTransform.assert_called_once_with(transform)
         actual_painter.drawPixmap.assert_called_once_with(-75, -75, get_pixmap.return_value)
 
-    @staticmethod
-    def __pixmap_to_bytes(pixmap):
-        array = QByteArray()
-        buffer = QBuffer(array)
-        buffer.open(QIODevice.WriteOnly)
-        pixmap.save(buffer, "PNG")
-        return array
-
     def test_background_colour(self):
         """Test setting the canvas colour through the container"""
         self.drawing_area.set_background_colour('aquamarine')
@@ -151,8 +144,8 @@ class TestCanvas(unittest.TestCase):
         self.assertEqual(self.drawing_area.canvas._DrawingArea__background_colour, get_colour('aquamarine'))
         pixmap = QPixmap(150, 150)
         pixmap.fill(QColor('aquamarine'))
-        self.assertEqual(self.__pixmap_to_bytes(self.drawing_area.canvas._DrawingArea__pixmap),
-                         self.__pixmap_to_bytes(pixmap))
+        self.assertEqual(pixmap_to_bytes(self.drawing_area.canvas._DrawingArea__pixmap),
+                         pixmap_to_bytes(pixmap))
 
     def test_events(self):
         handled_calls = Mock()

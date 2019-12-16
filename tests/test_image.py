@@ -19,18 +19,16 @@
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
-import os
 import unittest
 from functools import partial
 from unittest.mock import patch, ANY
 
-from PySide2.QtCore import QByteArray, QIODevice, QBuffer
-from PySide2.QtGui import QPixmap
 from PySide2.QtNetwork import QNetworkReply
 from PySide2.QtWidgets import QApplication
 
 import simplequi
 from simplequi._image import _IMAGE_CACHE, _PIXMAP_CACHE, get_pixmap
+from tests.helpers import get_example_resource_path, pixmap_data, pixmap_to_bytes
 
 
 class TestImage(unittest.TestCase):
@@ -78,37 +76,22 @@ class TestImage(unittest.TestCase):
         self.assertIsNone(get_pixmap(img, (10, 10), (10, 10), (10, 10)))
         self.assertNotIn(_IMAGE_CACHE[img], _PIXMAP_CACHE)
 
-    @staticmethod
-    def __pixmap_to_bytes(pixmap):
-        array = QByteArray()
-        buffer = QBuffer(array)
-        buffer.open(QIODevice.WriteOnly)
-        pixmap.save(buffer, "PNG")
-        return array
-
-    def __pixmap_data(self, img, x, y, dx, dy, size=None):
-        pixmap = QPixmap.fromImage(_IMAGE_CACHE[img].copy(x, y, dx, dy))
-        if size:
-            pixmap = pixmap.scaled(*size)
-        return self.__pixmap_to_bytes(pixmap)
-
     def test_valid_image_and_pixmaps(self):
-        os.chdir(os.path.dirname(__file__))
-        img = simplequi.load_image('../simplequi/examples/resources/sample_image.png')
+        img = simplequi.load_image(get_example_resource_path('sample_image.png'))
         self.catch_finish(img, fail=False, width=1000, height=1200)
         self.assertIsNotNone(_IMAGE_CACHE[img])
         self.assertIsNotNone(get_pixmap(img, (10, 10), (10, 10), (10, 10)))
 
-        small_unscaled = self.__pixmap_data(img, 0, 0, 20, 20)
-        small_scaled = self.__pixmap_data(img, 0, 0, 20, 20, size=(30, 25))
-        full_scaled = self.__pixmap_data(img, 0, 0, 1000, 1200, size=(50, 60))
-        middle = self.__pixmap_data(img, 307, 293, 250, 302)
+        small_unscaled = pixmap_data(img, 0, 0, 20, 20)
+        small_scaled = pixmap_data(img, 0, 0, 20, 20, size=(30, 25))
+        full_scaled = pixmap_data(img, 0, 0, 1000, 1200, size=(50, 60))
+        middle = pixmap_data(img, 307, 293, 250, 302)
 
         self.assertNotEqual(small_unscaled, small_scaled)
-        self.assertEqual(self.__pixmap_to_bytes(get_pixmap(img, (10, 10), (20, 20), (20, 20))), small_unscaled)
-        self.assertEqual(self.__pixmap_to_bytes(get_pixmap(img, (10, 10), (20, 20), (30, 25))), small_scaled)
-        self.assertEqual(self.__pixmap_to_bytes(get_pixmap(img, (500, 600), (1000, 1200), (50, 60))), full_scaled)
-        self.assertEqual(self.__pixmap_to_bytes(get_pixmap(img, (432, 444), (250, 302), (250, 302))), middle)
+        self.assertEqual(pixmap_to_bytes(get_pixmap(img, (10, 10), (20, 20), (20, 20))), small_unscaled)
+        self.assertEqual(pixmap_to_bytes(get_pixmap(img, (10, 10), (20, 20), (30, 25))), small_scaled)
+        self.assertEqual(pixmap_to_bytes(get_pixmap(img, (500, 600), (1000, 1200), (50, 60))), full_scaled)
+        self.assertEqual(pixmap_to_bytes(get_pixmap(img, (432, 444), (250, 302), (250, 302))), middle)
 
 
 if __name__ == '__main__':

@@ -18,21 +18,18 @@
 # You should have received a copy of the GNU General Public License
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
-import os
+
 import unittest
 
-from functools import partial
-from unittest.mock import patch, ANY
-
-from PySide2.QtCore import QByteArray, QIODevice, QBuffer, QTimer
-from PySide2.QtGui import QPixmap
+from PySide2.QtCore import QTimer
 from PySide2.QtMultimedia import QMediaPlayer
-from PySide2.QtNetwork import QNetworkReply
 from PySide2.QtWidgets import QApplication
 
 import simplequi
+from tests.helpers import get_example_resource_path, is_sound_available
 
 
+@unittest.skipIf(not is_sound_available(), 'sound not available')
 class TestSound(unittest.TestCase):
     """Test Image API"""
 
@@ -45,8 +42,8 @@ class TestSound(unittest.TestCase):
 
         def delayed_play():
             if not self.played:
-                QTimer.singleShot(10, sound.play)
                 self.played = True
+                QTimer.singleShot(0, sound.play)
 
         if play and not playing:
             sound._Sound__player.mediaStatusChanged.connect(delayed_play)
@@ -54,12 +51,8 @@ class TestSound(unittest.TestCase):
 
         # Record tracked set before pausing sound
         tracked = set([])
-        t = simplequi.create_timer(200, lambda: tracked.update(QApplication.instance().tracked))
-        t2 = simplequi.create_timer(300, sound.rewind)
-        t.start()
-        t2.start()
-        QApplication.instance().remove_tracked(t)
-        QApplication.instance().remove_tracked(t2)
+        QTimer.singleShot(200, lambda: tracked.update(QApplication.instance().tracked))
+        QTimer.singleShot(300, sound.rewind)
         QApplication.instance().exec_()
 
         self.assertEqual(sound._Sound__sound_loaded, not fail)
@@ -72,19 +65,18 @@ class TestSound(unittest.TestCase):
         self.assertEqual(sound._Sound__player.state(), QMediaPlayer.StoppedState)
 
     def test_invalid_path(self):
-        """Non-existent path doesn't fail but doesn't play either"""
-        sound = simplequi.load_sound('not_a_file.wav')
+        """Non-existent path doesn't raise errors but doesn't play either"""
+        sound = simplequi.load_sound(get_example_resource_path('253756_.wav'))
         self.wait_for_sound(sound, fail=True)
 
     def test_invalid_file(self):
         """Existing but non-sound path doesn't raise errors but doesn't play"""
-        sound = simplequi.load_sound(__file__)
+        sound = simplequi.load_sound(get_example_resource_path('sample_image.png'))
         self.wait_for_sound(sound, fail=True)
 
     @staticmethod
     def __valid_sound():
-        os.chdir(os.path.dirname(__file__))
-        return simplequi.load_sound('../simplequi/examples/resources/253756_tape-on.wav')
+        return simplequi.load_sound(get_example_resource_path('253756_tape-on.wav'))
 
     def test_play_before_load(self):
         """Test play being called while sound is still loading - should play on load"""

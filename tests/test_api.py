@@ -19,7 +19,6 @@
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
-import os
 import unittest
 
 from PySide2.QtCore import Qt
@@ -27,6 +26,7 @@ from PySide2.QtWidgets import QApplication
 
 import simplequi
 from simplequi._keys import REVERSE_KEY_MAP
+from tests.helpers import get_example_resource_path, is_sound_available
 
 
 class TestAPI(unittest.TestCase):
@@ -85,18 +85,17 @@ class TestAPI(unittest.TestCase):
 
     def test_load_image(self):
         """Test image is loaded"""
-        os.chdir(os.path.dirname(__file__))
-        image = simplequi.load_image('../simplequi/examples/resources/sample_image.png')
+        image = simplequi.load_image(get_example_resource_path('sample_image.png'))
         simplequi.create_timer(100, QApplication.instance().exit).start()
         QApplication.instance().exec_()
         self.assertEqual(image.get_width(), 1000)
         self.assertEqual(image.get_height(), 1200)
 
+    @unittest.skipIf(not is_sound_available(), 'sound not available')
     def test_load_sound(self):
         """Test MP3 and WAV sounds are loaded"""
-        os.chdir(os.path.dirname(__file__))
-        sound = simplequi.load_sound('../simplequi/examples/resources/425556__planetronik__rock-808-beat.mp3')
-        sound2 = simplequi.load_sound('../simplequi/examples/resources/253756_tape-on.wav')
+        sound = simplequi.load_sound(get_example_resource_path('425556__planetronik__rock-808-beat.mp3'))
+        sound2 = simplequi.load_sound(get_example_resource_path('253756_tape-on.wav'))
         simplequi.create_timer(200, QApplication.instance().exit).start()
         QApplication.instance().exec_()
         self.assertTrue(sound._Sound__sound_loaded)
