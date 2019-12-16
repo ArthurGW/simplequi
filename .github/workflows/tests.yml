@@ -37,7 +37,7 @@ jobs:
       run: apt install libpulse-dev
     - name: Get libpulse on macos
       if: matrix.os == 'macos-latest'
-      run: brew install libpulse-dev
+      run: brew install pulseaudio
     - name: Test with test script (unittest based)
       env:
         QT_QPA_PLATFORM: minimal
