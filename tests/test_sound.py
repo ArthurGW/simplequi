@@ -101,6 +101,7 @@ class TestSound(unittest.TestCase):
     def test_pause(self):
         sound = self.__valid_sound()
         self.wait_for_sound(sound, play=False, playing=False)
+        sound.set_volume(0)
         sound.play()
         sound.pause()
         self.assertEqual(sound._Sound__player.state(), QMediaPlayer.PausedState)
@@ -110,4 +111,6 @@ class TestSound(unittest.TestCase):
         sound = self.__valid_sound()
         sound.set_volume(0.67)
         self.assertEqual(sound._Sound__player.volume(), 67)
+        sound.set_volume(0.)
+        self.assertEqual(sound._Sound__player.volume(), 0)
 

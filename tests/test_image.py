@@ -57,7 +57,7 @@ class TestImage(unittest.TestCase):
             finish.side_effect = partial(self.on_finished, fail=fail)
             simplequi.create_timer(500, QApplication.instance().exit).start()
             QApplication.instance().exec_()
-        finish.assert_called_once_with(img._Image__load_image, ANY)
+        finish.assert_called_with(img._Image__load_image, ANY)
         self.assertTrue(self.passed, 'failed when expected to succeed or vice versa')
         self.assertEqual(img.get_width(), width)
         self.assertEqual(img.get_height(), height)
@@ -76,7 +76,7 @@ class TestImage(unittest.TestCase):
         self.catch_finish(img, fail=False)
         self.assertIsNone(_IMAGE_CACHE[img])
         self.assertIsNone(get_pixmap(img, (10, 10), (10, 10), (10, 10)))
-        self.assertDictEqual(_PIXMAP_CACHE, {})
+        self.assertNotIn(_IMAGE_CACHE[img], _PIXMAP_CACHE)
 
     @staticmethod
     def __pixmap_to_bytes(pixmap):
