@@ -35,6 +35,7 @@ jobs:
     - name: Test with test script (unittest based)
       env:
         QT_QPA_PLATFORM: minimal
+        GITHUB_TEST: 1
       run: |
         cd tests
         python run_all_tests.py
