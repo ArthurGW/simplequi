@@ -20,6 +20,7 @@
 # -----------------------------------------------------------------------------
 
 import unittest
+from unittest.mock import Mock, call
 
 from PySide2.QtWidgets import QApplication
 
@@ -27,9 +28,33 @@ import simplequi
 
 
 class TestTimer(unittest.TestCase):
-    """Tested separately from other API as it needs to run in the event loop"""
-    pass
+    """Tested Timer API"""
 
+    def setUp(self):
+        self.handler = Mock()
+        self.app = QApplication.instance()
+
+    def test_timer(self):
+        timer = simplequi.create_timer(100, self.handler)
+        self.assertFalse(timer.is_running())
+        self.assertNotIn(timer, self.app.tracked)
+        timer.start()
+        self.assertTrue(timer.is_running())
+        self.assertIn(timer, self.app.tracked)
+        timer.stop()
+        self.assertFalse(timer.is_running())
+        self.assertNotIn(timer, self.app.tracked)
+
+    def test_handler(self):
+        timer = simplequi.create_timer(8, self.handler)
+        stop_timer = simplequi.create_timer(40, timer.stop)
+        exit_timer = simplequi.create_timer(50, self.app.exit)
+        timer.start()
+        stop_timer.start()
+        exit_timer.start()
+        self.app.exec_()
+        self.handler.assert_has_calls([call() for _ in range(5)])
+        self.assertEqual(self.handler.call_count, 5)
 
 
 if __name__ == '__main__':
