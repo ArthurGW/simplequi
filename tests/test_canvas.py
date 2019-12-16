@@ -23,8 +23,8 @@ import math
 import unittest
 from unittest.mock import call, Mock, patch
 
-from PySide2.QtCore import QPoint, Qt
-from PySide2.QtGui import QPolygon, QFont, QTransform, QPalette, QMouseEvent, QKeyEvent
+from PySide2.QtCore import QPoint, Qt, QByteArray, QBuffer, QIODevice
+from PySide2.QtGui import QPolygon, QFont, QTransform, QPalette, QMouseEvent, QKeyEvent, QPixmap, QColor
 from PySide2.QtWidgets import QWidget, QApplication
 
 import simplequi
@@ -53,19 +53,7 @@ class TestCanvas(unittest.TestCase):
         self.image.get_height.return_value = 1200
         self.image.get_width.return_value = 1000
 
-    def draw_handler(self, _canvas):
-        # type: (Canvas) -> None
-        self.call_count += 1
-
-    def test_draw_loop(self):
-        """Run the draw loop for one second and check FPS"""
-        self.drawing_area.canvas.set_draw_handler(self.draw_handler)
-        self.drawing_area.canvas.start()
-        simplequi.create_timer(1000, QApplication.instance().exit).start()
-        QApplication.instance().exec_()
-        self.assertAlmostEqual(60, self.call_count, delta=5)
-
-    def draw_handler2(self, canvas):
+    def draw_handler(self, canvas):
         # type: (Canvas) -> None
         canvas.draw_point((10, 10), 'rgba(0, 10, 0, 0.5)')
         canvas.draw_polygon(self.polygon_list, 2, 'blue', 'green')
@@ -77,13 +65,22 @@ class TestCanvas(unittest.TestCase):
         canvas.draw_text('TEXT', (10, 10), 18, 'YELLOW', 'monospace')
         canvas.draw_image(self.image, [500, 600], [1000, 1200], [75, 75], [150, 150], math.pi / 2)
 
+    def test_draw_loop(self):
+        """Run the draw loop for one second and check FPS"""
+        handler = Mock()
+        self.drawing_area.canvas.set_draw_handler(handler)
+        self.drawing_area.canvas.start()
+        simplequi.create_timer(1000, QApplication.instance().exit).start()
+        QApplication.instance().exec_()
+        self.assertAlmostEqual(60, handler.call_count, delta=5)
+
     def test_drawing_calls(self):
         """Test all the drawing calls"""
         with patch('simplequi._canvas.QPainter') as painter:
             with patch('simplequi._canvas.QBrush') as brush:
                 with patch('simplequi._canvas.QPen') as pen:
                     with patch('simplequi._canvas.get_pixmap') as get_pixmap:
-                        self.drawing_area.canvas.set_draw_handler(self.draw_handler2)
+                        self.drawing_area.canvas.set_draw_handler(self.draw_handler)
                         self.drawing_area.canvas.start()
                         self.drawing_area.canvas._DrawingArea__draw()
 
@@ -138,12 +135,24 @@ class TestCanvas(unittest.TestCase):
         actual_painter.setTransform.assert_called_once_with(transform)
         actual_painter.drawPixmap.assert_called_once_with(-75, -75, get_pixmap.return_value)
 
+    @staticmethod
+    def __pixmap_to_bytes(pixmap):
+        array = QByteArray()
+        buffer = QBuffer(array)
+        buffer.open(QIODevice.WriteOnly)
+        pixmap.save(buffer, "PNG")
+        return array
+
     def test_background_colour(self):
         """Test setting the canvas colour through the container"""
         self.drawing_area.set_background_colour('aquamarine')
         self.assertEqual(self.drawing_area.backgroundRole(), QPalette.Shadow)
         self.assertEqual(self.drawing_area.canvas.palette().color(QPalette.Base), get_colour('aquamarine'))
         self.assertEqual(self.drawing_area.canvas._DrawingArea__background_colour, get_colour('aquamarine'))
+        pixmap = QPixmap(150, 150)
+        pixmap.fill(QColor('aquamarine'))
+        self.assertEqual(self.__pixmap_to_bytes(self.drawing_area.canvas._DrawingArea__pixmap),
+                         self.__pixmap_to_bytes(pixmap))
 
     def test_events(self):
         handled_calls = Mock()
