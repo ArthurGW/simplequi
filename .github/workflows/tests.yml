@@ -34,7 +34,7 @@ jobs:
         flake8 simplequi --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with test script (unittest based)
       env:
-        QT_QPA_PLATFORM: offscreen
+        QT_QPA_PLATFORM: minimal
       run: |
         cd tests
         python run_all_tests.py
