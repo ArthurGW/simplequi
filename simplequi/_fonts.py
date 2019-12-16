@@ -20,11 +20,11 @@
 # -----------------------------------------------------------------------------
 
 """Utilities for caching and getting fonts"""
-
+import os
+import pkg_resources
 from collections import namedtuple
 from enum import Enum
 from unittest.mock import Mock
-import pkg_resources
 
 from PySide2.QtCore import QRect
 from PySide2.QtGui import QFont, QFontMetrics, QFontDatabase
@@ -54,7 +54,7 @@ class FontFace(Enum):
 class FontManager:
     """Stores various font parameters used by the app"""
     monospace = 'monospace'
-    if not isinstance(TheApp, Mock):
+    if not os.getenv('GITHUB_TEST', False) and not isinstance(TheApp, Mock):
         # Changes the default monospace font to one a bit less wide than Courier New
         font_path = pkg_resources.resource_filename(__name__, 'resources/fonts/NK57 Monospace/nk57-monospace-sc-rg.ttf')
         if font_path:
