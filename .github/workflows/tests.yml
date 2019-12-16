@@ -6,11 +6,10 @@ on:
       - master         # Push events on master branch
 
 jobs:
-  build:
+  tests:
 
     runs-on: ${{ matrix.os }}
     strategy:
-      max-parallel: 2
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
         python-version: [3.5, 3.6, 3.7]
@@ -34,6 +33,8 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 simplequi --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with test script (unittest based)
+      env:
+        QT_QPA_PLATFORM: offscreen
       run: |
         cd tests
         python run_all_tests.py
