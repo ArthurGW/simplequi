@@ -7,6 +7,8 @@ on:
 
 jobs:
   tests:
+    env:
+      NO_AUDIO: 1
     runs-on: ${{ matrix.os }}
     strategy:
       max-parallel: 1
@@ -41,7 +43,6 @@ jobs:
       if: "!contains(matrix.os, 'windows')"
       env:
         QT_QPA_PLATFORM: offscreen
-        NO_AUDIO: 1
       run: |
         cd tests
         python run_all_tests.py
