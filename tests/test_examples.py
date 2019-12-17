@@ -65,17 +65,17 @@ class TestExamples(unittest.TestCase):
     """Run everything from the examples folder"""
 
     @classmethod
-    def factory(cls, path):
+    def factory(cls, script_path):
         """Generates a test function for the given path"""
-        file_name = os.path.splitext(os.path.basename(path))[0]
+        file_name = os.path.splitext(os.path.basename(script_path))[0]
         test_name = 'test_{}'.format(file_name)
 
         def run_test(self):
-            with open(path) as inp:
+            with open(script_path) as inp:
                 script = inp.read()
                 script += SCRIPT_END
 
-            os.chdir(os.path.dirname(path))
+            os.chdir(os.path.dirname(script_path))
             exec(script, {})
 
         setattr(cls, test_name, run_test)

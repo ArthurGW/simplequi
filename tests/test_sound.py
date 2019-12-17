@@ -26,10 +26,10 @@ from PySide2.QtMultimedia import QMediaPlayer
 from PySide2.QtWidgets import QApplication
 
 import simplequi
-from tests.helpers import get_example_resource_path, is_sound_available
+from tests.helpers import get_example_resource_path, sound_unavailable
 
 
-@unittest.skipIf(not is_sound_available(), 'sound not available')
+@unittest.skipIf(sound_unavailable(), 'sound not available')
 class TestSound(unittest.TestCase):
     """Test Image API"""
 

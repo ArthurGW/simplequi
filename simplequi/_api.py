@@ -22,15 +22,22 @@
 
 The returned objects from these functions all implement their own APIs defined in their respective classes."""
 
+import os
 from typing import Callable, Optional
+from unittest.mock import Mock
 
 from ._canvas import Canvas
 from ._frame import Frame
 from ._image import Image
 from ._keys import KEY_MAP
-from ._sound import Sound
 from ._timer import Timer
 from ._widgets import Control
+
+# Import Qt Multimedia libraries causes problems on cloud test runners, so this is mocked if necessary
+if os.getenv('NO_AUDIO', False):
+    Sound = Mock()
+else:
+    from ._sound import Sound
 
 __all__ = [
     'KEY_MAP',

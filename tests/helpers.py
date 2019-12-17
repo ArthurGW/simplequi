@@ -18,11 +18,14 @@
 # You should have received a copy of the GNU General Public License
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
+"""Small utilities that are used by more than one test class"""
+
+
+import os
 import pkg_resources
 
 from PySide2.QtCore import QByteArray, QBuffer, QIODevice
 from PySide2.QtGui import QPixmap
-from PySide2.QtMultimedia import QAudio, QAudioDeviceInfo
 
 from simplequi._image import _IMAGE_CACHE
 
@@ -32,13 +35,9 @@ def get_example_resource_path(filename):
     return pkg_resources.resource_filename('simplequi.examples', 'resources/' + filename)
 
 
-def is_sound_available():
+def sound_unavailable():
     """Whether the system supports audio outputs"""
-    info = QAudioDeviceInfo()
-    supported = bool(info.availableDevices(QAudio.AudioOutput))
-    if not supported:
-        print('Audio output not supported, skipping sound tests.')
-    return supported
+    return bool(os.getenv('NO_AUDIO', False))
 
 
 def pixmap_to_bytes(pixmap):
