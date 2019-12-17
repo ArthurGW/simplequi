@@ -35,7 +35,7 @@ class TestApp(unittest.TestCase):
 
     def test_app(self):
         """Test adding and removing objects"""
-        # These mocks needs to be here so the app can exit properly after this method ends
+        # These mocks need to be here so the app can exit properly after this method ends
         with patch('PySide2.QtWidgets.QApplication.exit') as exit_func:
             with patch.object(self.app, '_AppWithRunningFlag__queue_check_for_exit') as queue_check:
                 queue_check.side_effect = self.app._AppWithRunningFlag__check_for_exit
