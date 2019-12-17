@@ -38,4 +38,4 @@ __all__ = [
    ]
 __doc__ = _api.__doc__
 
-__version__ = '1.0.5'
+__version__ = '1.0.6'

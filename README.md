@@ -1,6 +1,6 @@
 # simplequi
 
-*v1.0.5*
+*v1.0.6*
 
 ![Build Status](https://github.com/ArthurGW/simplequi/workflows/build/badge.svg)
 ![Test Status](https://github.com/ArthurGW/simplequi/workflows/tests/badge.svg)
