@@ -18,8 +18,10 @@
 # You should have received a copy of the GNU General Public License
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
+import os
 
-from PySide2.QtMultimedia import QAudio, QMediaPlayer, QMediaContent
+from PySide2.QtCore import QFile
+from PySide2.QtMultimedia import QAudio, QMediaContent, QMediaPlayer
 
 from ._app import TheApp
 from ._url import request
@@ -44,13 +46,18 @@ class Sound:
         # without using a frame or any timers:
         TheApp.add_tracked(self)
 
-        req = request(url)
-        content = QMediaContent(req)
-        self.__player = QMediaPlayer(flags=QMediaPlayer.LowLatency)
+        self.__player = QMediaPlayer(TheApp, flags=QMediaPlayer.LowLatency)
         self.__player.setAudioRole(QAudio.GameRole)
-        self.__player.setMedia(content)
         self.__player.mediaStatusChanged.connect(self.__on_status_changed)
         self.__player.error.connect(self.__on_status_changed)
+
+        req = request(url)
+        content = QMediaContent(req)
+        stream = None
+        if os.path.exists(url) and os.path.isfile(url):
+            stream = QFile(url, TheApp)
+            stream.open(QFile.ReadOnly)
+        self.__player.setMedia(content, stream)
 
         self.__sound_loaded = False
         self.__play_requested = False
@@ -72,13 +79,17 @@ class Sound:
         """
         error = self.__player.error()
         status = self.__player.mediaStatus()
+        if status < QMediaPlayer.LoadedMedia:
+            return
+
         if error == QMediaPlayer.NoError and QMediaPlayer.LoadedMedia <= status < QMediaPlayer.InvalidMedia:
             # Check if the media is actually an audio file that is playable
             if self.__player.isAudioAvailable():
                 self.__sound_loaded = True
                 if self.__play_requested and status != QMediaPlayer.EndOfMedia:
                     # Play and don't do anything else now
-                    return self.play()
+                    self.play()
+                    return
         else:
             self.__sound_loaded = False
         self.__play_requested = False

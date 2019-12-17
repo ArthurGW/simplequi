@@ -66,9 +66,7 @@ def request(url):
     # type: (str) -> QNetworkRequest
     """Construct a network request for the specified url"""
     is_file = os.path.isfile(url)
-    print('URL request: {}\nIs file: {}\nExists: {}'.format(url, is_file, os.path.exists(url) if is_file else 'N/A'))
     url = QUrl.fromLocalFile(url) if is_file else QUrl(url)
-    print(url.toDisplayString())
 
     if url.scheme() == 'https':
         ManagerWrapper.ensure_openssl_location()

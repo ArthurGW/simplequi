@@ -32,10 +32,7 @@ from simplequi._image import _IMAGE_CACHE
 
 def get_example_resource_path(filename):
     """Returns the full local path of a resource in simplequi.examples.resources"""
-    path = pkg_resources.resource_filename('simplequi.examples', 'resources/' + filename)
-    print(path)
-    print('Exists' if os.path.exists(path) else 'Does not exist')
-    return path
+    return pkg_resources.resource_filename('simplequi.examples', 'resources/' + filename)
 
 
 def sound_unavailable():
