@@ -39,7 +39,7 @@ jobs:
     - name: Test with test script (Not Windows)
       if: "!contains(matrix.os, 'windows')"
       env:
-        QT_QPA_PLATFORM: minimal
+        QT_QPA_PLATFORM: offscreen
         NO_AUDIO: 1
       run: |
         cd tests
