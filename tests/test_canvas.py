@@ -31,7 +31,7 @@ import simplequi
 from simplequi._canvas import Canvas, DrawingAreaContainer
 from simplequi._colours import get_colour
 from simplequi._fonts import FontManager
-from tests.helpers import pixmap_to_bytes
+from tests.helpers import pixmap_to_bytes, disable_call_counts
 
 
 class TestCanvas(unittest.TestCase):
@@ -71,9 +71,13 @@ class TestCanvas(unittest.TestCase):
         handler = Mock()
         self.drawing_area.canvas.set_draw_handler(handler)
         self.drawing_area.canvas.start()
+        self.assertTrue(self.drawing_area.canvas.started)
         simplequi.create_timer(1000, QApplication.instance().exit).start()
         QApplication.instance().exec_()
-        self.assertAlmostEqual(60, handler.call_count, delta=5)
+        if not disable_call_counts():
+            self.assertAlmostEqual(60, handler.call_count, delta=5)
+        handler.assert_has_calls([call(self.drawing_area.canvas._DrawingArea__canvas)
+                                  for _ in range(handler.call_count)])
 
     def test_drawing_calls(self):
         """Test all the drawing calls"""

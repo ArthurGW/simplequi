@@ -41,6 +41,7 @@ jobs:
     - name: Test with test script (Not Windows)
       if: "!contains(matrix.os, 'windows')"
       env:
+        NO_CALL_COUNTS: ${{ contains(matrix.os, 'macos' }}
         QT_QPA_PLATFORM: offscreen
       run: |
         cd tests

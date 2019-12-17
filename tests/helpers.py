@@ -40,6 +40,12 @@ def sound_unavailable():
     return bool(os.getenv('NO_AUDIO', False))
 
 
+def disable_call_counts():
+    """Whether to count calls in period of time - not working on MacOS so enable disabling"""
+    var = os.getenv('NO_CALL_COUNTS', False)
+    return bool(var) and var.lower() != 'false'
+
+
 def pixmap_to_bytes(pixmap):
     """Converts a pixmap to a byte array for easy comparisons"""
     array = QByteArray()

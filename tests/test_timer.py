@@ -25,6 +25,7 @@ from unittest.mock import Mock, call
 from PySide2.QtWidgets import QApplication
 
 import simplequi
+from tests.helpers import disable_call_counts
 
 
 class TestTimer(unittest.TestCase):
@@ -53,7 +54,9 @@ class TestTimer(unittest.TestCase):
         stop_timer.start()
         exit_timer.start()
         self.app.exec_()
-        self.assertAlmostEqual(self.handler.call_count, 5, delta=1)  # Allow delta due to timer inaccuracies
+        self.assertFalse(timer.is_running())
+        if not disable_call_counts():
+            self.assertAlmostEqual(self.handler.call_count, 5, delta=1)  # Allow delta due to timer inaccuracies
         self.handler.assert_has_calls([call() for _ in range(self.handler.call_count)])
 
 
