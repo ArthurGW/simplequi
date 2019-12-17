@@ -18,9 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with simplequi.  If not, see <https://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
-import os
 
-from PySide2.QtCore import QFile
 from PySide2.QtMultimedia import QAudio, QMediaContent, QMediaPlayer
 
 from ._app import TheApp
@@ -53,11 +51,7 @@ class Sound:
 
         req = request(url)
         content = QMediaContent(req)
-        stream = None
-        if os.path.exists(url) and os.path.isfile(url):
-            stream = QFile(url, TheApp)
-            stream.open(QFile.ReadOnly)
-        self.__player.setMedia(content, stream)
+        self.__player.setMedia(content)
 
         self.__sound_loaded = False
         self.__play_requested = False
