@@ -31,6 +31,7 @@ with open(readme_path, 'r') as readme_file:
 BUILD_REQUIREMENTS = [
     'bump2version>=0.5.11',
     'wheel>=0.33.6',
+    'setuptools>=40',
 ]
 
 DOCS_REQUIREMENTS = [
