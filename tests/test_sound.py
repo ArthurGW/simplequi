@@ -22,11 +22,13 @@
 import unittest
 
 from PySide2.QtCore import QTimer
-from PySide2.QtMultimedia import QMediaPlayer
 from PySide2.QtWidgets import QApplication
 
 import simplequi
 from tests.helpers import get_example_resource_path, sound_unavailable
+
+if not sound_unavailable():
+    from PySide2.QtMultimedia import QMediaPlayer
 
 
 @unittest.skipIf(sound_unavailable(), 'sound not available')

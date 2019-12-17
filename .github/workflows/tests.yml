@@ -9,12 +9,11 @@ jobs:
   tests:
     env:
       NO_AUDIO: 1
-    runs-on: ${{ matrix.os }}
     strategy:
-      max-parallel: 1
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-latest, macos-latest]
         python-version: [3.5, 3.6, 3.7]
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v1
